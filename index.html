@@ -1711,9 +1711,10 @@ function lsGet(key, def) {
   try {
     const raw = localStorage.getItem('wp_' + key);
     if (raw === null || raw === undefined) return def;
-    return JSON.parse(raw);
+    const parsed = JSON.parse(raw);
+    return parsed;
   } catch(e) {
-    console.error('Storage read error:', e);
+    console.error('lsGet error for key:', key, e);
     return def;
   }
 }
@@ -1723,13 +1724,7 @@ async function storageSet(key, val) { return lsSet(key, val); }
 async function storageGetParsed(key, def) { return lsGet(key, def); }
 
 // ===================== PRELOADED WEEK 1 DATA =====================
-// Computed to exactly match getWeekLabel output on every device
-const WEEK1 = (() => {
-  const mon = new Date(2026, 1, 23); // Feb 23 2026 local
-  const sun = new Date(2026, 2, 1);  // Mar 1 2026 local
-  const fmt = dt => dt.toLocaleDateString('en', { month:'short', day:'numeric' });
-  return fmt(mon) + ' – ' + fmt(sun);
-})();
+const WEEK1 = 'Feb 23 – Mar 1';
 
 const PRELOADED_ENTRIES = [
   // ── TEAM RAM ── (exact from Excel Week 1)
@@ -1898,11 +1893,11 @@ async function init() {
 
   // Load preloaded entries — always replace pre_ entries with latest correct data
   const preloaded = lsGet('preloaded_done', false);
-  if (preloaded !== 'v8') {
+  if (preloaded !== 'v9') {
     const existing = lsGet('entries', []).filter(e => !e.id.startsWith('pre_')); // keep only real user entries
     const merged = [...existing, ...PRELOADED_ENTRIES]; // always use fresh preloaded data
     lsSet('entries', merged);
-    lsSet('preloaded_done', 'v8');
+    lsSet('preloaded_done', 'v9');
     console.log('✅ Preloaded v6 —', merged.length, 'entries');
   }
 
@@ -2109,17 +2104,29 @@ async function saveEntry() {
   }
 
   const notes = document.getElementById('entryNotes').value.trim();
-  const today = dateStr(new Date());
+  const now = new Date();
+  const today = dateStr(now);
+  const week = getWeekLabel(now);
 
-  // Load entries synchronously
+  console.log('💾 Saving entry:', {
+    member: state.currentUser,
+    team: state.currentTeam,
+    date: today,
+    week: week,
+    activity: state.selectedActivity,
+    option: state.selectedOption,
+    pts: state.selectedOptionPts
+  });
+
   const entries = lsGet('entries', []);
+  console.log('📦 Loaded', entries.length, 'existing entries');
 
   const newEntry = {
     id: 'e_' + Date.now(),
     member: state.currentUser,
     team: state.currentTeam,
     date: today,
-    week: getWeekLabel(new Date()),
+    week: week,
     activity: state.selectedActivity,
     option: state.selectedOption,
     pts: state.selectedOptionPts,
@@ -2136,23 +2143,25 @@ async function saveEntry() {
   const maxPts = Math.max(...allToday.map(e => e.pts));
   allToday.forEach(e => { e.counted = (e.pts === maxPts); });
 
-  // Save synchronously
   const saved = lsSet('entries', entries);
+  console.log('💾 lsSet result:', saved);
 
   if (!saved) {
-    showToast('❌ Save failed! Check browser storage settings');
+    showToast('❌ Save failed!');
     return;
   }
 
-  // Verify save worked
+  // Verify
   const verify = lsGet('entries', []);
   const found = verify.find(e => e.id === newEntry.id);
+  console.log('🔍 Verify find result:', found ? 'FOUND ✅' : 'NOT FOUND ❌');
+
   if (!found) {
-    showToast('❌ Entry not saved — storage may be blocked');
+    showToast('❌ Entry not saved — storage blocked');
     return;
   }
 
-  showToast(`✅ Saved! ${state.selectedOptionPts} pts`);
+  showToast('✅ Saved! ' + state.selectedOptionPts + ' pts');
 
   // Reset UI
   state.selectedActivity = null;
@@ -2165,21 +2174,31 @@ async function saveEntry() {
   document.getElementById('trackingLink').value = '';
   document.getElementById('entryNotes').value = '';
 
-  await renderTodayLogs();
-  await updateWeekStats();
-  await renderStreak();
+  renderTodayLogs();
+  updateWeekStats();
+  renderStreak();
 }
 
-async function renderTodayLogs() {
+function renderTodayLogs() {
   const today = dateStr(new Date());
   const entries = lsGet('entries', []);
   const todayEntries = entries.filter(e => e.member === state.currentUser && e.date === today);
+
+  console.log('📅 renderTodayLogs:', {
+    today,
+    currentUser: state.currentUser,
+    totalEntries: entries.length,
+    todayEntries: todayEntries.length,
+    sampleEntries: entries.slice(-3).map(e => ({member:e.member, date:e.date, id:e.id}))
+  });
+
   const container = document.getElementById('todayLogs');
+  if (!container) return;
 
   document.getElementById('todayLoggedAlert').classList.toggle('hidden', todayEntries.length === 0);
 
   if (!todayEntries.length) {
-    container.innerHTML = `<div style="text-align:center;padding:24px;color:var(--wolf-gray);font-family:var(--font-heading);">No entries today yet. Get moving! 🐺</div>`;
+    container.innerHTML = '<div style="text-align:center;padding:24px;color:var(--wolf-gray);font-family:var(--font-heading);">No entries today yet. Get moving! 🐺</div>';
     return;
   }
 
@@ -2189,7 +2208,7 @@ async function renderTodayLogs() {
       <div class="log-info">
         <div class="log-type" style="color:${actColor(e.activity)}">${e.activity.toUpperCase()} — ${e.option}</div>
         <div class="log-detail">${e.counted ? '✅ Counted' : '⚠️ Not counted (lower score)'} · ${e.pts} pts</div>
-        <a class="log-link" href="${e.trackingLink}" target="_blank">🔗 View Activity</a>
+        ${e.trackingLink && e.trackingLink !== '#ghosted' && e.trackingLink !== '#preloaded' ? `<a class="log-link" href="${e.trackingLink}" target="_blank">🔗 View Activity</a>` : ''}
       </div>
       <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
         <div class="log-pts">${e.pts}</div>
@@ -2199,7 +2218,7 @@ async function renderTodayLogs() {
   `).join('');
 }
 
-async function updateWeekStats() {
+function updateWeekStats() {
   const entries = lsGet('entries', []);
   const week = getWeekLabel(new Date());
   const myEntries = entries.filter(e => e.member === state.currentUser && e.week === week && e.counted);
@@ -2213,7 +2232,7 @@ async function updateWeekStats() {
   document.getElementById('statTotal').textContent = total;
 }
 
-async function renderStreak() {
+function renderStreak() {
   const entries = lsGet('entries', []);
   const myEntries = entries.filter(e => e.member === state.currentUser && e.counted);
   const streak = calcStreak(myEntries);
@@ -2831,11 +2850,10 @@ function actColor(a) {
 }
 
 function dateStr(d) {
-  // Local date — avoids UTC offset bug for IST and other timezones
   const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return y + '-' + m + '-' + day;
+  const m = String(d.getMonth()+1).padStart(2,'0');
+  const day = String(d.getDate()).padStart(2,'0');
+  return y+'-'+m+'-'+day;
 }
 
 function tomorrow() {

@@ -1726,79 +1726,86 @@ async function storageGetParsed(key, def) { return lsGet(key, def); }
 const WEEK1 = 'Feb 23 – Mar 1';
 
 const PRELOADED_ENTRIES = [
-  // ── TEAM RAM ──
-  // Ram: Tue Run R=10, Wed Str S=10, Thu Run R=10, Sat Run R=10
+  // ── TEAM RAM ── (exact from Excel Week 1)
+
+  // Ram: Tue R=10, Wed S=10, Thu R=10, Fri S=10, Sat R=10 = 50pts
   {id:'pre_ram_tue_run', member:'Ram (Captain)', team:'Ram', date:'2026-02-24', week:WEEK1, activity:'run', option:'Completed as per plan', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-24T07:00:00Z', counted:true},
   {id:'pre_ram_wed_str', member:'Ram (Captain)', team:'Ram', date:'2026-02-25', week:WEEK1, activity:'strength', option:'Full session', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-25T07:00:00Z', counted:true},
   {id:'pre_ram_thu_run', member:'Ram (Captain)', team:'Ram', date:'2026-02-26', week:WEEK1, activity:'run', option:'Completed as per plan', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-26T07:00:00Z', counted:true},
+  {id:'pre_ram_fri_str', member:'Ram (Captain)', team:'Ram', date:'2026-02-27', week:WEEK1, activity:'strength', option:'Full session', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-27T07:00:00Z', counted:true},
   {id:'pre_ram_sat_run', member:'Ram (Captain)', team:'Ram', date:'2026-02-28', week:WEEK1, activity:'run', option:'Completed as per plan', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-28T07:00:00Z', counted:true},
 
-  // VP: Tue Run R=10, Thu Run R=10, Sat Str S=10, Sun Run R=10
+  // VP: Tue R=10, Wed S=10, Thu R=10, Fri S=10, Sun R=10 = 50pts
   {id:'pre_vp_tue_run', member:'VP', team:'Ram', date:'2026-02-24', week:WEEK1, activity:'run', option:'Completed as per plan', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-24T07:00:00Z', counted:true},
+  {id:'pre_vp_wed_str', member:'VP', team:'Ram', date:'2026-02-25', week:WEEK1, activity:'strength', option:'Full session', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-25T07:00:00Z', counted:true},
   {id:'pre_vp_thu_run', member:'VP', team:'Ram', date:'2026-02-26', week:WEEK1, activity:'run', option:'Completed as per plan', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-26T07:00:00Z', counted:true},
-  {id:'pre_vp_sat_str', member:'VP', team:'Ram', date:'2026-02-28', week:WEEK1, activity:'strength', option:'Full session', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-28T07:00:00Z', counted:true},
+  {id:'pre_vp_fri_str', member:'VP', team:'Ram', date:'2026-02-27', week:WEEK1, activity:'strength', option:'Full session', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-27T07:00:00Z', counted:true},
   {id:'pre_vp_sun_run', member:'VP', team:'Ram', date:'2026-03-01', week:WEEK1, activity:'run', option:'Completed as per plan', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-03-01T07:00:00Z', counted:true},
 
-  // Rahul: Wed Str S=10, Wed Run M=7(not counted, str higher), Thu Informed I=1, Fri Run R=10, Sun Run R=10
-  {id:'pre_rahul_wed_str', member:'Rahul', team:'Ram', date:'2026-02-25', week:WEEK1, activity:'strength', option:'Full session', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-25T07:00:00Z', counted:true},
-  {id:'pre_rahul_wed_run', member:'Rahul', team:'Ram', date:'2026-02-25', week:WEEK1, activity:'run', option:'Modified but showed up', pts:7, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-25T08:00:00Z', counted:false},
+  // Rahul: Tue S=10, Wed M=7, Thu I=1, Fri R=10, Sun R=10 = 38pts
+  {id:'pre_rahul_tue_str', member:'Rahul', team:'Ram', date:'2026-02-24', week:WEEK1, activity:'strength', option:'Full session', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-24T07:00:00Z', counted:true},
+  {id:'pre_rahul_wed_run', member:'Rahul', team:'Ram', date:'2026-02-25', week:WEEK1, activity:'run', option:'Modified but showed up', pts:7, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-25T07:00:00Z', counted:true},
   {id:'pre_rahul_thu_inf', member:'Rahul', team:'Ram', date:'2026-02-26', week:WEEK1, activity:'run', option:'Informed miss (rest/niggle)', pts:1, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-26T07:00:00Z', counted:true},
   {id:'pre_rahul_fri_run', member:'Rahul', team:'Ram', date:'2026-02-27', week:WEEK1, activity:'run', option:'Completed as per plan', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-27T07:00:00Z', counted:true},
   {id:'pre_rahul_sun_run', member:'Rahul', team:'Ram', date:'2026-03-01', week:WEEK1, activity:'run', option:'Completed as per plan', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-03-01T07:00:00Z', counted:true},
 
-  // Pradheep: Wed Run M=7, Wed Str S=10(higher, counted), Thu Run R=10
-  {id:'pre_pradheep_wed_run', member:'Pradheep', team:'Ram', date:'2026-02-25', week:WEEK1, activity:'run', option:'Modified but showed up', pts:7, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-25T07:00:00Z', counted:false},
-  {id:'pre_pradheep_wed_str', member:'Pradheep', team:'Ram', date:'2026-02-25', week:WEEK1, activity:'strength', option:'Full session', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-25T08:00:00Z', counted:true},
+  // Pradheep: Tue M=7, Wed S=10, Thu R=10 = 27pts
+  {id:'pre_pradheep_tue_run', member:'Pradheep', team:'Ram', date:'2026-02-24', week:WEEK1, activity:'run', option:'Modified but showed up', pts:7, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-24T07:00:00Z', counted:true},
+  {id:'pre_pradheep_wed_str', member:'Pradheep', team:'Ram', date:'2026-02-25', week:WEEK1, activity:'strength', option:'Full session', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-25T07:00:00Z', counted:true},
   {id:'pre_pradheep_thu_run', member:'Pradheep', team:'Ram', date:'2026-02-26', week:WEEK1, activity:'run', option:'Completed as per plan', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-26T07:00:00Z', counted:true},
 
-  // Kirupa: Tue Run R=10, Wed Str S=10, Thu Run R=10, Sat Str S=10, Sun Run R=10
+  // Kirupa: Tue R=10, Wed S=10, Thu R=10, Fri S=10, Sun R=10 = 50pts
   {id:'pre_kirupa_tue_run', member:'Kirupa', team:'Ram', date:'2026-02-24', week:WEEK1, activity:'run', option:'Completed as per plan', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-24T07:00:00Z', counted:true},
   {id:'pre_kirupa_wed_str', member:'Kirupa', team:'Ram', date:'2026-02-25', week:WEEK1, activity:'strength', option:'Full session', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-25T07:00:00Z', counted:true},
   {id:'pre_kirupa_thu_run', member:'Kirupa', team:'Ram', date:'2026-02-26', week:WEEK1, activity:'run', option:'Completed as per plan', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-26T07:00:00Z', counted:true},
-  {id:'pre_kirupa_sat_str', member:'Kirupa', team:'Ram', date:'2026-02-28', week:WEEK1, activity:'strength', option:'Full session', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-28T07:00:00Z', counted:true},
+  {id:'pre_kirupa_fri_str', member:'Kirupa', team:'Ram', date:'2026-02-27', week:WEEK1, activity:'strength', option:'Full session', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-27T07:00:00Z', counted:true},
   {id:'pre_kirupa_sun_run', member:'Kirupa', team:'Ram', date:'2026-03-01', week:WEEK1, activity:'run', option:'Completed as per plan', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-03-01T07:00:00Z', counted:true},
 
-  // Rags: Tue Run R=10, Thu Str S=10, Thu Run R=10(same day, both 10, first counted), Fri Run R=10, Sun Run R=10
+  // Rags: Tue R=10, Thu S=10, Fri R=10, Sat S=10, Sun R=10 = 50pts
   {id:'pre_rags_tue_run', member:'Rags', team:'Ram', date:'2026-02-24', week:WEEK1, activity:'run', option:'Completed as per plan', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-24T07:00:00Z', counted:true},
   {id:'pre_rags_thu_str', member:'Rags', team:'Ram', date:'2026-02-26', week:WEEK1, activity:'strength', option:'Full session', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-26T07:00:00Z', counted:true},
   {id:'pre_rags_fri_run', member:'Rags', team:'Ram', date:'2026-02-27', week:WEEK1, activity:'run', option:'Completed as per plan', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-27T07:00:00Z', counted:true},
+  {id:'pre_rags_sat_str', member:'Rags', team:'Ram', date:'2026-02-28', week:WEEK1, activity:'strength', option:'Full session', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-28T07:00:00Z', counted:true},
   {id:'pre_rags_sun_run', member:'Rags', team:'Ram', date:'2026-03-01', week:WEEK1, activity:'run', option:'Completed as per plan', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-03-01T07:00:00Z', counted:true},
 
-  // Poonthamizhan: Tue Informed I=1, Wed Str S=10, Thu Run R=10, Sat Str S=10
+  // Poonthamizhan: Tue I=1, Wed S=10, Thu R=10, Sat S=10 = 31pts
   {id:'pre_poon_tue_inf', member:'Poonthamizhan', team:'Ram', date:'2026-02-24', week:WEEK1, activity:'run', option:'Informed miss (rest/niggle)', pts:1, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-24T07:00:00Z', counted:true},
   {id:'pre_poon_wed_str', member:'Poonthamizhan', team:'Ram', date:'2026-02-25', week:WEEK1, activity:'strength', option:'Full session', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-25T07:00:00Z', counted:true},
   {id:'pre_poon_thu_run', member:'Poonthamizhan', team:'Ram', date:'2026-02-26', week:WEEK1, activity:'run', option:'Completed as per plan', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-26T07:00:00Z', counted:true},
   {id:'pre_poon_sat_str', member:'Poonthamizhan', team:'Ram', date:'2026-02-28', week:WEEK1, activity:'strength', option:'Full session', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-28T07:00:00Z', counted:true},
 
-  // Sanjeev: Tue Run R=10, Wed Str S=10, Thu Run R=10, Sat Str S=10, Sun Run R=10
+  // Sanjeev: Tue Run=10, Wed Str=10, Thu Run=10, Fri Str=10, Sun Run=10 = 50pts
   {id:'pre_sanjeev_tue_run', member:'Sanjeev', team:'Ram', date:'2026-02-24', week:WEEK1, activity:'run', option:'Completed as per plan', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-24T07:00:00Z', counted:true},
   {id:'pre_sanjeev_wed_str', member:'Sanjeev', team:'Ram', date:'2026-02-25', week:WEEK1, activity:'strength', option:'Full session', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-25T07:00:00Z', counted:true},
   {id:'pre_sanjeev_thu_run', member:'Sanjeev', team:'Ram', date:'2026-02-26', week:WEEK1, activity:'run', option:'Completed as per plan', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-26T07:00:00Z', counted:true},
-  {id:'pre_sanjeev_sat_str', member:'Sanjeev', team:'Ram', date:'2026-02-28', week:WEEK1, activity:'strength', option:'Full session', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-28T07:00:00Z', counted:true},
+  {id:'pre_sanjeev_fri_str', member:'Sanjeev', team:'Ram', date:'2026-02-27', week:WEEK1, activity:'strength', option:'Full session', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-27T07:00:00Z', counted:true},
   {id:'pre_sanjeev_sun_run', member:'Sanjeev', team:'Ram', date:'2026-03-01', week:WEEK1, activity:'run', option:'Completed as per plan', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-03-01T07:00:00Z', counted:true},
 
   // Priya: Tue Ghosted G=0, Thu Run R=10
-  {id:'pre_priya_tue_ghost', member:'Priya', team:'Ram', date:'2026-02-24', week:WEEK1, activity:'run', option:'Ghosted', pts:0, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-24T07:00:00Z', counted:true},
-  {id:'pre_priya_thu_run', member:'Priya', team:'Ram', date:'2026-02-26', week:WEEK1, activity:'run', option:'Completed as per plan', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-26T07:00:00Z', counted:true},
+  // Priya: Tue G=0 = 0pts
+  {id:'pre_priya_tue_ghost', member:'Priya', team:'Ram', date:'2026-02-24', week:WEEK1, activity:'run', option:'Ghosted', pts:0, trackingLink:'#ghosted', notes:'', timestamp:'2026-02-24T07:00:00Z', counted:true},
 
   // Kalai: Tue Ghosted G=0, Wed Run R=10, Thu Run R=10, Fri Run R=10
-  {id:'pre_kalai_tue_ghost', member:'Kalai', team:'Ram', date:'2026-02-24', week:WEEK1, activity:'run', option:'Ghosted', pts:0, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-24T07:00:00Z', counted:true},
+  // Kalai: Tue G=0, Wed R=10, Thu R=10, Sat R=10 = 30pts
+  {id:'pre_kalai_tue_ghost', member:'Kalai', team:'Ram', date:'2026-02-24', week:WEEK1, activity:'run', option:'Ghosted', pts:0, trackingLink:'#ghosted', notes:'', timestamp:'2026-02-24T07:00:00Z', counted:true},
   {id:'pre_kalai_wed_run', member:'Kalai', team:'Ram', date:'2026-02-25', week:WEEK1, activity:'run', option:'Completed as per plan', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-25T07:00:00Z', counted:true},
   {id:'pre_kalai_thu_run', member:'Kalai', team:'Ram', date:'2026-02-26', week:WEEK1, activity:'run', option:'Completed as per plan', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-26T07:00:00Z', counted:true},
-  {id:'pre_kalai_fri_run', member:'Kalai', team:'Ram', date:'2026-02-27', week:WEEK1, activity:'run', option:'Completed as per plan', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-27T07:00:00Z', counted:true},
+  {id:'pre_kalai_sat_run', member:'Kalai', team:'Ram', date:'2026-02-28', week:WEEK1, activity:'run', option:'Completed as per plan', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-28T07:00:00Z', counted:true},
 
   // Sandy: Tue Informed I=1, Wed Str S=10, Thu Run R=10, Fri Run R=10
+  // Sandy: Tue I=1, Wed S=10, Thu R=10, Sat R=10 = 31pts
   {id:'pre_sandy_tue_inf', member:'Sandy', team:'Ram', date:'2026-02-24', week:WEEK1, activity:'run', option:'Informed miss (rest/niggle)', pts:1, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-24T07:00:00Z', counted:true},
   {id:'pre_sandy_wed_str', member:'Sandy', team:'Ram', date:'2026-02-25', week:WEEK1, activity:'strength', option:'Full session', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-25T07:00:00Z', counted:true},
   {id:'pre_sandy_thu_run', member:'Sandy', team:'Ram', date:'2026-02-26', week:WEEK1, activity:'run', option:'Completed as per plan', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-26T07:00:00Z', counted:true},
-  {id:'pre_sandy_fri_run', member:'Sandy', team:'Ram', date:'2026-02-27', week:WEEK1, activity:'run', option:'Completed as per plan', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-27T07:00:00Z', counted:true},
+  {id:'pre_sandy_sat_run', member:'Sandy', team:'Ram', date:'2026-02-28', week:WEEK1, activity:'run', option:'Completed as per plan', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-28T07:00:00Z', counted:true},
 
   // Aathi: Tue Run R=10, Wed Run R=10, Thu Run R=10, Sat Str S=10, Fri Run R=10
+  // Aathi: Tue R=10, Wed R=10, Thu R=10, Fri S=10, Sat R=10 = 50pts
   {id:'pre_aathi_tue_run', member:'Aathi', team:'Ram', date:'2026-02-24', week:WEEK1, activity:'run', option:'Completed as per plan', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-24T07:00:00Z', counted:true},
   {id:'pre_aathi_wed_run', member:'Aathi', team:'Ram', date:'2026-02-25', week:WEEK1, activity:'run', option:'Completed as per plan', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-25T07:00:00Z', counted:true},
   {id:'pre_aathi_thu_run', member:'Aathi', team:'Ram', date:'2026-02-26', week:WEEK1, activity:'run', option:'Completed as per plan', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-26T07:00:00Z', counted:true},
-  {id:'pre_aathi_fri_run', member:'Aathi', team:'Ram', date:'2026-02-27', week:WEEK1, activity:'run', option:'Completed as per plan', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-27T07:00:00Z', counted:true},
-  {id:'pre_aathi_sat_str', member:'Aathi', team:'Ram', date:'2026-02-28', week:WEEK1, activity:'strength', option:'Full session', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-28T07:00:00Z', counted:true},
+  {id:'pre_aathi_fri_str', member:'Aathi', team:'Ram', date:'2026-02-27', week:WEEK1, activity:'strength', option:'Full session', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-27T07:00:00Z', counted:true},
+  {id:'pre_aathi_sat_run', member:'Aathi', team:'Ram', date:'2026-02-28', week:WEEK1, activity:'run', option:'Completed as per plan', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-28T07:00:00Z', counted:true},
 
   // ── TEAM MANO ──
   // Mano: Tue Run R=10, Wed Str S=10, Thu Run R=10, Fri Str S=10, Sat Run R=10
@@ -1883,17 +1890,17 @@ async function init() {
   const legends = lsGet('legends', null);
   if (!legends) lsSet('legends', DEFAULT_LEGENDS);
 
-  // Load preloaded entries once
+  // Load preloaded entries — v2 forces refresh with corrected data
   const preloaded = lsGet('preloaded_done', false);
-  if (!preloaded) {
-    const existing = lsGet('entries', []);
+  if (preloaded !== 'v3') {
+    const existing = lsGet('entries', []).filter(e => !e.id.startsWith('pre_')); // keep real entries
     const merged = [...existing];
     PRELOADED_ENTRIES.forEach(pe => {
       if (!merged.find(e => e.id === pe.id)) merged.push(pe);
     });
     lsSet('entries', merged);
-    lsSet('preloaded_done', true);
-    console.log('✅ Preloaded', merged.length, 'entries');
+    lsSet('preloaded_done', 'v3');
+    console.log('✅ Preloaded v2 —', merged.length, 'entries');
   }
 
   // Check saved session

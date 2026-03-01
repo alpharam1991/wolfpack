@@ -1,0 +1,2853 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🐺 WOLFPACK Challenge</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --wolf-dark: #0a0c10;
+  --wolf-navy: #0d1117;
+  --wolf-blue: #1a2035;
+  --wolf-gold: #f5c518;
+  --wolf-gold-dim: #c9a012;
+  --wolf-red: #e63946;
+  --wolf-green: #2dc653;
+  --wolf-cyan: #00b4d8;
+  --wolf-purple: #7b2d8b;
+  --wolf-gray: #8892a4;
+  --wolf-light: #e8eaf0;
+  --wolf-card: #141824;
+  --wolf-border: rgba(245,197,24,0.15);
+  --wolf-border-bright: rgba(245,197,24,0.4);
+  --radius: 12px;
+  --font-display: 'Bebas Neue', sans-serif;
+  --font-heading: 'Barlow Condensed', sans-serif;
+  --font-body: 'Barlow', sans-serif;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background: var(--wolf-dark);
+  color: var(--wolf-light);
+  font-family: var(--font-body);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+body::before {
+  content:'';
+  position:fixed;
+  inset:0;
+  background: radial-gradient(ellipse at 20% 0%, rgba(245,197,24,0.06) 0%, transparent 50%),
+              radial-gradient(ellipse at 80% 100%, rgba(0,180,216,0.04) 0%, transparent 50%);
+  pointer-events:none;
+  z-index:0;
+}
+
+/* SCROLLBAR */
+::-webkit-scrollbar { width:4px; }
+::-webkit-scrollbar-track { background:var(--wolf-navy); }
+::-webkit-scrollbar-thumb { background:var(--wolf-gold-dim); border-radius:2px; }
+
+/* SCREENS */
+.screen { display:none; min-height:100vh; position:relative; z-index:1; }
+.screen.active { display:flex; flex-direction:column; }
+
+/* ===================== SPLASH ===================== */
+#splash {
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  background: radial-gradient(ellipse at center, #1a1f2e 0%, var(--wolf-dark) 70%);
+}
+
+.splash-wolf {
+  font-size:80px;
+  animation: wolfPulse 2s ease-in-out infinite;
+  display:block;
+  margin-bottom:16px;
+}
+
+@keyframes wolfPulse {
+  0%,100% { transform:scale(1); filter:drop-shadow(0 0 20px rgba(245,197,24,0.3)); }
+  50% { transform:scale(1.05); filter:drop-shadow(0 0 40px rgba(245,197,24,0.6)); }
+}
+
+.splash-title {
+  font-family: var(--font-display);
+  font-size: clamp(60px,12vw,100px);
+  color: var(--wolf-gold);
+  letter-spacing:6px;
+  line-height:1;
+  text-shadow: 0 0 60px rgba(245,197,24,0.4);
+}
+
+.splash-sub {
+  font-family: var(--font-heading);
+  font-size:18px;
+  color:var(--wolf-gray);
+  letter-spacing:4px;
+  text-transform:uppercase;
+  margin:8px 0 40px;
+}
+
+.splash-tagline {
+  font-family: var(--font-heading);
+  font-size:14px;
+  color:rgba(245,197,24,0.6);
+  letter-spacing:2px;
+  margin-bottom:48px;
+  font-style:italic;
+}
+
+/* BUTTONS */
+.btn {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  padding:14px 28px;
+  border-radius:var(--radius);
+  border:none;
+  cursor:pointer;
+  font-family: var(--font-heading);
+  font-size:16px;
+  font-weight:700;
+  letter-spacing:1px;
+  text-transform:uppercase;
+  transition: all 0.2s ease;
+  position:relative;
+  overflow:hidden;
+}
+
+.btn::after {
+  content:'';
+  position:absolute;
+  inset:0;
+  background:rgba(255,255,255,0.1);
+  opacity:0;
+  transition:opacity 0.2s;
+}
+
+.btn:hover::after { opacity:1; }
+.btn:active { transform:scale(0.97); }
+
+.btn-gold {
+  background: linear-gradient(135deg, var(--wolf-gold), var(--wolf-gold-dim));
+  color: var(--wolf-dark);
+}
+
+.btn-outline {
+  background:transparent;
+  border:2px solid var(--wolf-border-bright);
+  color:var(--wolf-gold);
+}
+
+.btn-outline:hover { border-color:var(--wolf-gold); background:rgba(245,197,24,0.05); }
+
+.btn-red {
+  background: linear-gradient(135deg, var(--wolf-red), #c1121f);
+  color:white;
+}
+
+.btn-green {
+  background: linear-gradient(135deg, var(--wolf-green), #1a9e3a);
+  color:var(--wolf-dark);
+  font-weight:900;
+}
+
+.btn-ghost {
+  background:rgba(255,255,255,0.05);
+  color:var(--wolf-light);
+  border:1px solid rgba(255,255,255,0.1);
+}
+
+.btn-ghost:hover { background:rgba(255,255,255,0.1); }
+
+.btn-full { width:100%; }
+
+.btn-lg { padding:18px 36px; font-size:18px; }
+.btn-sm { padding:8px 16px; font-size:13px; }
+
+/* CARDS */
+.card {
+  background:var(--wolf-card);
+  border:1px solid var(--wolf-border);
+  border-radius:var(--radius);
+  padding:20px;
+}
+
+.card-gold-border {
+  border-color:var(--wolf-border-bright);
+}
+
+/* HEADER */
+.app-header {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:16px 20px;
+  background:rgba(13,17,23,0.95);
+  border-bottom:1px solid var(--wolf-border);
+  position:sticky;
+  top:0;
+  z-index:100;
+  backdrop-filter:blur(20px);
+}
+
+.header-logo {
+  font-family:var(--font-display);
+  font-size:26px;
+  color:var(--wolf-gold);
+  letter-spacing:3px;
+}
+
+.header-user {
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.user-avatar {
+  width:36px;
+  height:36px;
+  border-radius:50%;
+  background:linear-gradient(135deg,var(--wolf-gold),var(--wolf-gold-dim));
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-family:var(--font-heading);
+  font-weight:900;
+  font-size:14px;
+  color:var(--wolf-dark);
+}
+
+.user-name-sm {
+  font-family:var(--font-heading);
+  font-size:14px;
+  color:var(--wolf-light);
+  font-weight:600;
+}
+
+.captain-badge {
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+  background:linear-gradient(135deg,var(--wolf-gold),var(--wolf-gold-dim));
+  color:var(--wolf-dark);
+  padding:2px 8px;
+  border-radius:20px;
+  font-family:var(--font-heading);
+  font-size:11px;
+  font-weight:900;
+  letter-spacing:1px;
+}
+
+/* BOTTOM NAV */
+.bottom-nav {
+  position:fixed;
+  bottom:0;
+  left:0; right:0;
+  background:rgba(13,17,23,0.97);
+  border-top:1px solid var(--wolf-border);
+  display:flex;
+  z-index:100;
+  backdrop-filter:blur(20px);
+  padding-bottom:env(safe-area-inset-bottom);
+}
+
+.nav-item {
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  padding:10px 4px 8px;
+  cursor:pointer;
+  transition:all 0.2s;
+  border:none;
+  background:none;
+  color:var(--wolf-gray);
+  font-family:var(--font-heading);
+  font-size:10px;
+  letter-spacing:0.5px;
+  text-transform:uppercase;
+  gap:4px;
+}
+
+.nav-item .nav-icon { font-size:20px; transition:transform 0.2s; }
+.nav-item.active { color:var(--wolf-gold); }
+.nav-item.active .nav-icon { transform:scale(1.2); }
+
+/* CONTENT AREA */
+.content {
+  flex:1;
+  padding:16px;
+  padding-bottom:80px;
+  overflow-y:auto;
+}
+
+/* SECTION TITLES */
+.section-title {
+  font-family:var(--font-display);
+  font-size:28px;
+  color:var(--wolf-gold);
+  letter-spacing:3px;
+  margin-bottom:4px;
+}
+
+.section-sub {
+  font-size:13px;
+  color:var(--wolf-gray);
+  margin-bottom:20px;
+}
+
+/* FORM ELEMENTS */
+.form-group { margin-bottom:16px; }
+
+.form-label {
+  display:block;
+  font-family:var(--font-heading);
+  font-size:13px;
+  color:var(--wolf-gray);
+  letter-spacing:1px;
+  text-transform:uppercase;
+  margin-bottom:8px;
+  font-weight:600;
+}
+
+.form-input, .form-select {
+  width:100%;
+  padding:12px 16px;
+  background:rgba(255,255,255,0.05);
+  border:1px solid var(--wolf-border);
+  border-radius:var(--radius);
+  color:var(--wolf-light);
+  font-family:var(--font-body);
+  font-size:15px;
+  transition:border-color 0.2s;
+  appearance:none;
+}
+
+.form-input:focus, .form-select:focus {
+  outline:none;
+  border-color:var(--wolf-gold);
+  background:rgba(245,197,24,0.05);
+}
+
+.form-input::placeholder { color:var(--wolf-gray); }
+
+/* Fix dropdown option colors on all browsers */
+.form-select option {
+  background-color: #1a2035;
+  color: #e8eaf0;
+}
+
+select { color-scheme: dark; }
+
+textarea.form-input { resize:vertical; min-height:80px; }
+
+/* RADIO GROUP */
+.radio-group {
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+}
+
+.radio-btn {
+  flex:1;
+  min-width:80px;
+  padding:10px 12px;
+  background:rgba(255,255,255,0.04);
+  border:1.5px solid rgba(255,255,255,0.1);
+  border-radius:var(--radius);
+  text-align:center;
+  cursor:pointer;
+  transition:all 0.2s;
+  font-family:var(--font-heading);
+  font-size:14px;
+  font-weight:600;
+  color:var(--wolf-gray);
+}
+
+.radio-btn:hover { border-color:var(--wolf-gold-dim); color:var(--wolf-light); }
+.radio-btn.selected {
+  border-color:var(--wolf-gold);
+  background:rgba(245,197,24,0.12);
+  color:var(--wolf-gold);
+}
+
+/* ACTIVITY BUTTONS */
+.activity-grid {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  margin-bottom:16px;
+}
+
+.activity-btn {
+  padding:20px 12px;
+  border-radius:var(--radius);
+  border:2px solid transparent;
+  cursor:pointer;
+  text-align:center;
+  transition:all 0.25s;
+  background:var(--wolf-card);
+  position:relative;
+  overflow:hidden;
+}
+
+.activity-btn::before {
+  content:'';
+  position:absolute;
+  inset:0;
+  opacity:0;
+  transition:opacity 0.25s;
+}
+
+.activity-btn:hover::before { opacity:1; }
+
+.activity-btn.run { border-color:rgba(230,57,70,0.3); }
+.activity-btn.run::before { background:linear-gradient(135deg,rgba(230,57,70,0.1),transparent); }
+.activity-btn.run:hover, .activity-btn.run.selected { border-color:var(--wolf-red); background:rgba(230,57,70,0.1); }
+
+.activity-btn.strength { border-color:rgba(245,197,24,0.3); }
+.activity-btn.strength::before { background:linear-gradient(135deg,rgba(245,197,24,0.1),transparent); }
+.activity-btn.strength:hover, .activity-btn.strength.selected { border-color:var(--wolf-gold); background:rgba(245,197,24,0.08); }
+
+.activity-btn.culture { border-color:rgba(0,180,216,0.3); }
+.activity-btn.culture::before { background:linear-gradient(135deg,rgba(0,180,216,0.1),transparent); }
+.activity-btn.culture:hover, .activity-btn.culture.selected { border-color:var(--wolf-cyan); background:rgba(0,180,216,0.08); }
+
+.activity-btn.crosstraining { border-color:rgba(45,198,83,0.3); }
+.activity-btn.crosstraining::before { background:linear-gradient(135deg,rgba(45,198,83,0.1),transparent); }
+.activity-btn.crosstraining:hover, .activity-btn.crosstraining.selected { border-color:var(--wolf-green); background:rgba(45,198,83,0.08); }
+
+.act-icon { font-size:32px; display:block; margin-bottom:8px; }
+.act-label {
+  font-family:var(--font-heading);
+  font-size:16px;
+  font-weight:700;
+  letter-spacing:1px;
+  text-transform:uppercase;
+  display:block;
+  margin-bottom:4px;
+}
+.act-info-btn {
+  position:absolute;
+  top:8px; right:8px;
+  background:rgba(255,255,255,0.1);
+  border:none;
+  border-radius:50%;
+  width:22px; height:22px;
+  cursor:pointer;
+  font-size:12px;
+  color:var(--wolf-gray);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:all 0.2s;
+}
+.act-info-btn:hover { background:rgba(245,197,24,0.2); color:var(--wolf-gold); }
+
+/* OPTION PILLS */
+.options-container {
+  display:none;
+  padding:16px;
+  background:rgba(255,255,255,0.03);
+  border-radius:var(--radius);
+  border:1px solid var(--wolf-border);
+  margin-bottom:12px;
+  animation:slideDown 0.2s ease;
+}
+
+.options-container.visible { display:block; }
+
+@keyframes slideDown {
+  from { opacity:0; transform:translateY(-8px); }
+  to { opacity:1; transform:translateY(0); }
+}
+
+.options-label {
+  font-family:var(--font-heading);
+  font-size:12px;
+  color:var(--wolf-gray);
+  letter-spacing:1px;
+  text-transform:uppercase;
+  margin-bottom:10px;
+}
+
+.option-pills { display:flex; flex-wrap:wrap; gap:8px; }
+
+.option-pill {
+  padding:8px 14px;
+  border-radius:30px;
+  border:1.5px solid rgba(255,255,255,0.1);
+  background:transparent;
+  color:var(--wolf-gray);
+  font-family:var(--font-heading);
+  font-size:13px;
+  font-weight:600;
+  cursor:pointer;
+  transition:all 0.2s;
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+
+.option-pill:hover { border-color:rgba(255,255,255,0.3); color:var(--wolf-light); }
+.option-pill.selected-run { border-color:var(--wolf-red); background:rgba(230,57,70,0.15); color:var(--wolf-red); }
+.option-pill.selected-strength { border-color:var(--wolf-gold); background:rgba(245,197,24,0.1); color:var(--wolf-gold); }
+.option-pill.selected-culture { border-color:var(--wolf-cyan); background:rgba(0,180,216,0.1); color:var(--wolf-cyan); }
+.option-pill.selected-crosstraining { border-color:var(--wolf-green); background:rgba(45,198,83,0.1); color:var(--wolf-green); }
+
+/* POINTS FLASH */
+.points-flash {
+  display:none;
+  text-align:center;
+  padding:16px;
+  background:rgba(245,197,24,0.08);
+  border:1px solid var(--wolf-border-bright);
+  border-radius:var(--radius);
+  margin-bottom:16px;
+  animation:flashIn 0.3s ease;
+}
+.points-flash.visible { display:block; }
+
+@keyframes flashIn {
+  from { opacity:0; transform:scale(0.95); }
+  to { opacity:1; transform:scale(1); }
+}
+
+.points-number {
+  font-family:var(--font-display);
+  font-size:56px;
+  color:var(--wolf-gold);
+  line-height:1;
+  text-shadow: 0 0 30px rgba(245,197,24,0.5);
+}
+
+.points-label {
+  font-family:var(--font-heading);
+  font-size:13px;
+  color:var(--wolf-gray);
+  letter-spacing:2px;
+  text-transform:uppercase;
+}
+
+/* STAT CARDS */
+.stats-row {
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+  margin-bottom:20px;
+}
+
+.stat-card {
+  background:var(--wolf-card);
+  border:1px solid var(--wolf-border);
+  border-radius:var(--radius);
+  padding:14px 10px;
+  text-align:center;
+}
+
+.stat-value {
+  font-family:var(--font-display);
+  font-size:32px;
+  color:var(--wolf-gold);
+  line-height:1;
+}
+
+.stat-label {
+  font-family:var(--font-heading);
+  font-size:10px;
+  color:var(--wolf-gray);
+  letter-spacing:1px;
+  text-transform:uppercase;
+  margin-top:4px;
+}
+
+/* STREAK */
+.streak-badge {
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:6px 14px;
+  border-radius:30px;
+  font-family:var(--font-heading);
+  font-size:14px;
+  font-weight:700;
+}
+
+.streak-3 { background:rgba(230,57,70,0.15); border:1px solid var(--wolf-red); color:var(--wolf-red); }
+.streak-6 { background:rgba(245,197,24,0.15); border:1px solid var(--wolf-gold); color:var(--wolf-gold); animation:streakGlow 1.5s ease-in-out infinite; }
+
+@keyframes streakGlow {
+  0%,100% { box-shadow:0 0 10px rgba(245,197,24,0.2); }
+  50% { box-shadow:0 0 25px rgba(245,197,24,0.5); }
+}
+
+/* LEADERBOARD */
+.lb-row {
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:12px 16px;
+  background:var(--wolf-card);
+  border:1px solid var(--wolf-border);
+  border-radius:var(--radius);
+  margin-bottom:8px;
+  transition:all 0.2s;
+}
+
+.lb-row:hover { border-color:var(--wolf-border-bright); }
+
+.lb-rank {
+  font-family:var(--font-display);
+  font-size:22px;
+  color:var(--wolf-gray);
+  width:30px;
+  text-align:center;
+}
+
+.lb-rank.gold { color:var(--wolf-gold); }
+.lb-rank.silver { color:#c0c0c0; }
+.lb-rank.bronze { color:#cd7f32; }
+
+.lb-avatar {
+  width:38px; height:38px;
+  border-radius:50%;
+  background:linear-gradient(135deg, var(--wolf-blue), var(--wolf-navy));
+  border:2px solid var(--wolf-border);
+  display:flex; align-items:center; justify-content:center;
+  font-family:var(--font-heading);
+  font-size:14px;
+  font-weight:700;
+  flex-shrink:0;
+}
+
+.lb-name {
+  flex:1;
+  font-family:var(--font-heading);
+  font-size:15px;
+  font-weight:700;
+}
+
+.lb-team-tag {
+  font-size:10px;
+  color:var(--wolf-gray);
+  font-weight:400;
+  display:block;
+}
+
+.lb-pts {
+  font-family:var(--font-display);
+  font-size:24px;
+  color:var(--wolf-gold);
+}
+
+/* WEEK SELECTOR */
+.week-chips {
+  display:flex;
+  gap:8px;
+  overflow-x:auto;
+  padding-bottom:8px;
+  margin-bottom:16px;
+  scrollbar-width:none;
+}
+.week-chips::-webkit-scrollbar { display:none; }
+
+.week-chip {
+  flex-shrink:0;
+  padding:6px 14px;
+  border-radius:30px;
+  border:1.5px solid var(--wolf-border);
+  background:transparent;
+  color:var(--wolf-gray);
+  font-family:var(--font-heading);
+  font-size:12px;
+  font-weight:600;
+  cursor:pointer;
+  transition:all 0.2s;
+  white-space:nowrap;
+}
+
+.week-chip:hover { border-color:var(--wolf-gold-dim); color:var(--wolf-light); }
+.week-chip.active { border-color:var(--wolf-gold); background:rgba(245,197,24,0.1); color:var(--wolf-gold); }
+
+/* HEATMAP */
+.heatmap {
+  display:grid;
+  grid-template-columns:repeat(7,1fr);
+  gap:4px;
+  margin-bottom:16px;
+}
+
+.heatmap-day {
+  aspect-ratio:1;
+  border-radius:4px;
+  background:rgba(255,255,255,0.04);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:9px;
+  color:var(--wolf-gray);
+  font-family:var(--font-heading);
+  font-weight:600;
+  cursor:pointer;
+  transition:all 0.2s;
+  position:relative;
+}
+
+.heatmap-day.has-activity { background:rgba(245,197,24,0.15); color:var(--wolf-gold); }
+.heatmap-day.high-activity { background:rgba(245,197,24,0.4); color:var(--wolf-dark); }
+.heatmap-day.today { outline:2px solid var(--wolf-gold); outline-offset:1px; }
+.heatmap-day.day-header { background:transparent; cursor:default; font-size:10px; color:var(--wolf-gray); }
+
+/* LOG ENTRIES */
+.log-entry {
+  display:flex;
+  align-items:flex-start;
+  gap:12px;
+  padding:14px;
+  background:var(--wolf-card);
+  border:1px solid var(--wolf-border);
+  border-radius:var(--radius);
+  margin-bottom:8px;
+}
+
+.log-dot {
+  width:10px; height:10px;
+  border-radius:50%;
+  margin-top:4px;
+  flex-shrink:0;
+}
+
+.log-dot.run { background:var(--wolf-red); }
+.log-dot.strength { background:var(--wolf-gold); }
+.log-dot.culture { background:var(--wolf-cyan); }
+.log-dot.crosstraining { background:var(--wolf-green); }
+.log-dot.freepass { background:var(--wolf-purple); }
+
+.log-info { flex:1; }
+.log-type {
+  font-family:var(--font-heading);
+  font-size:14px;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:0.5px;
+}
+.log-detail { font-size:12px; color:var(--wolf-gray); margin-top:2px; }
+.log-link { font-size:11px; color:var(--wolf-cyan); text-decoration:none; }
+.log-pts {
+  font-family:var(--font-display);
+  font-size:22px;
+  color:var(--wolf-gold);
+  flex-shrink:0;
+}
+
+/* MODAL */
+.modal-overlay {
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.7);
+  z-index:200;
+  align-items:flex-end;
+  backdrop-filter:blur(4px);
+}
+
+.modal-overlay.open { display:flex; }
+
+.modal {
+  background:var(--wolf-card);
+  border:1px solid var(--wolf-border-bright);
+  border-bottom:none;
+  border-radius:var(--radius) var(--radius) 0 0;
+  width:100%;
+  max-height:85vh;
+  overflow-y:auto;
+  padding:24px 20px;
+  animation:slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from { transform:translateY(100%); }
+  to { transform:translateY(0); }
+}
+
+.modal-handle {
+  width:40px; height:4px;
+  background:rgba(255,255,255,0.2);
+  border-radius:2px;
+  margin:0 auto 20px;
+}
+
+.modal-title {
+  font-family:var(--font-display);
+  font-size:26px;
+  color:var(--wolf-gold);
+  letter-spacing:2px;
+  margin-bottom:4px;
+}
+
+.modal-sub {
+  font-size:13px;
+  color:var(--wolf-gray);
+  margin-bottom:20px;
+}
+
+/* LEGEND TABLE */
+.legend-table { width:100%; border-collapse:collapse; }
+.legend-table th {
+  font-family:var(--font-heading);
+  font-size:11px;
+  color:var(--wolf-gray);
+  letter-spacing:1px;
+  text-transform:uppercase;
+  padding:8px 12px;
+  text-align:left;
+  border-bottom:1px solid var(--wolf-border);
+}
+.legend-table td {
+  padding:10px 12px;
+  font-size:14px;
+  border-bottom:1px solid rgba(255,255,255,0.04);
+}
+.legend-table tr:last-child td { border-bottom:none; }
+.pts-badge {
+  display:inline-block;
+  padding:2px 10px;
+  border-radius:20px;
+  background:rgba(245,197,24,0.15);
+  border:1px solid var(--wolf-border-bright);
+  color:var(--wolf-gold);
+  font-family:var(--font-heading);
+  font-size:13px;
+  font-weight:700;
+}
+
+/* TEAM VS TEAM */
+.team-vs {
+  background:var(--wolf-card);
+  border:1px solid var(--wolf-border);
+  border-radius:var(--radius);
+  padding:20px;
+  margin-bottom:16px;
+}
+
+.vs-title {
+  font-family:var(--font-display);
+  font-size:18px;
+  color:var(--wolf-gray);
+  text-align:center;
+  letter-spacing:3px;
+  margin-bottom:16px;
+}
+
+.vs-row {
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-bottom:12px;
+}
+
+.vs-team-name {
+  font-family:var(--font-heading);
+  font-size:16px;
+  font-weight:700;
+  width:90px;
+  letter-spacing:0.5px;
+}
+
+.vs-bar-container {
+  flex:1;
+  height:12px;
+  background:rgba(255,255,255,0.06);
+  border-radius:6px;
+  overflow:hidden;
+}
+
+.vs-bar {
+  height:100%;
+  border-radius:6px;
+  transition:width 0.8s ease;
+}
+
+.vs-bar.ram { background:linear-gradient(90deg,var(--wolf-gold),var(--wolf-gold-dim)); }
+.vs-bar.mano { background:linear-gradient(90deg,var(--wolf-cyan),#0094b3); }
+
+.vs-score {
+  font-family:var(--font-display);
+  font-size:22px;
+  width:50px;
+  text-align:right;
+}
+
+/* ALERT BADGE */
+.alert-badge {
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:4px 10px;
+  border-radius:6px;
+  font-family:var(--font-heading);
+  font-size:12px;
+  font-weight:700;
+}
+
+.alert-red { background:rgba(230,57,70,0.15); color:var(--wolf-red); border:1px solid rgba(230,57,70,0.3); }
+.alert-yellow { background:rgba(245,197,24,0.1); color:var(--wolf-gold); border:1px solid var(--wolf-border); }
+.alert-green { background:rgba(45,198,83,0.1); color:var(--wolf-green); border:1px solid rgba(45,198,83,0.3); }
+
+/* CAPTAIN PANEL */
+.captain-section {
+  margin-bottom:24px;
+}
+
+.captain-section-title {
+  font-family:var(--font-heading);
+  font-size:13px;
+  color:var(--wolf-gray);
+  letter-spacing:2px;
+  text-transform:uppercase;
+  font-weight:700;
+  margin-bottom:12px;
+  padding-bottom:8px;
+  border-bottom:1px solid var(--wolf-border);
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+/* TABS */
+.tabs {
+  display:flex;
+  gap:4px;
+  background:rgba(255,255,255,0.04);
+  border-radius:var(--radius);
+  padding:4px;
+  margin-bottom:20px;
+}
+
+.tab {
+  flex:1;
+  padding:10px;
+  border-radius:8px;
+  border:none;
+  background:transparent;
+  color:var(--wolf-gray);
+  font-family:var(--font-heading);
+  font-size:13px;
+  font-weight:700;
+  letter-spacing:0.5px;
+  cursor:pointer;
+  transition:all 0.2s;
+  text-align:center;
+}
+
+.tab.active {
+  background:var(--wolf-card);
+  color:var(--wolf-gold);
+  box-shadow:0 2px 8px rgba(0,0,0,0.3);
+}
+
+/* MEMBER MANAGEMENT */
+.member-row {
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:12px 14px;
+  background:var(--wolf-card);
+  border:1px solid var(--wolf-border);
+  border-radius:var(--radius);
+  margin-bottom:8px;
+}
+
+.member-row-info { flex:1; }
+.member-row-name { font-family:var(--font-heading); font-size:15px; font-weight:700; }
+.member-row-team { font-size:12px; color:var(--wolf-gray); }
+
+/* TOAST */
+.toast {
+  position:fixed;
+  bottom:90px;
+  left:50%;
+  transform:translateX(-50%) translateY(20px);
+  background:rgba(20,24,36,0.95);
+  border:1px solid var(--wolf-border-bright);
+  border-radius:var(--radius);
+  padding:12px 20px;
+  font-family:var(--font-heading);
+  font-size:14px;
+  font-weight:600;
+  color:var(--wolf-gold);
+  z-index:300;
+  opacity:0;
+  transition:all 0.3s ease;
+  white-space:nowrap;
+  pointer-events:none;
+}
+
+.toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+/* SUNDAY LOCK */
+.sunday-lock {
+  text-align:center;
+  padding:48px 24px;
+}
+
+.lock-icon { font-size:60px; margin-bottom:16px; }
+.lock-title {
+  font-family:var(--font-display);
+  font-size:32px;
+  color:var(--wolf-gray);
+  letter-spacing:3px;
+  margin-bottom:8px;
+}
+.lock-sub { font-size:14px; color:var(--wolf-gray); line-height:1.6; }
+
+/* RECAP */
+.recap-box {
+  background:linear-gradient(135deg,rgba(245,197,24,0.08),rgba(0,180,216,0.05));
+  border:1px solid var(--wolf-border-bright);
+  border-radius:var(--radius);
+  padding:20px;
+  margin-bottom:16px;
+}
+
+.recap-quote {
+  font-family:var(--font-heading);
+  font-size:16px;
+  font-style:italic;
+  color:var(--wolf-light);
+  line-height:1.6;
+  margin-bottom:12px;
+  padding-left:12px;
+  border-left:3px solid var(--wolf-gold);
+}
+
+/* ANIMATIONS */
+@keyframes fadeIn {
+  from { opacity:0; transform:translateY(8px); }
+  to { opacity:1; transform:translateY(0); }
+}
+
+.fade-in { animation:fadeIn 0.3s ease forwards; }
+
+/* DIVIDER */
+.divider {
+  height:1px;
+  background:var(--wolf-border);
+  margin:20px 0;
+}
+
+/* Fix mobile touch */
+.activity-btn, .radio-btn, .option-pill, .week-chip, .nav-item, .heatmap-day {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  cursor: pointer;
+  user-select: none;
+}
+
+/* RESPONSIVE */
+@media(min-width:480px) {
+  .activity-grid { grid-template-columns:repeat(4,1fr); }
+  .content { max-width:600px; margin:0 auto; }
+  .app-header { max-width:600px; margin:0 auto; width:100%; }
+  .bottom-nav { max-width:600px; left:50%; transform:translateX(-50%); }
+  .toast { bottom:100px; }
+}
+
+/* HIDDEN */
+.hidden { display:none !important; }
+
+/* REQUIRED STAR */
+.required { color:var(--wolf-red); margin-left:3px; }
+
+/* FREE PASS TAG */
+.free-pass-tag {
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+  padding:3px 10px;
+  border-radius:20px;
+  background:rgba(123,45,139,0.2);
+  border:1px solid rgba(123,45,139,0.5);
+  color:#c77dff;
+  font-family:var(--font-heading);
+  font-size:12px;
+  font-weight:700;
+}
+
+/* PASSWORD SCREEN */
+#captain-login {
+  align-items:center;
+  justify-content:center;
+  padding:24px;
+  min-height:100vh;
+}
+
+.login-box {
+  width:100%;
+  max-width:380px;
+  text-align:center;
+}
+
+.login-icon { font-size:56px; margin-bottom:16px; }
+
+/* SHIMMER for loading */
+.shimmer {
+  background:linear-gradient(90deg,rgba(255,255,255,0.04) 0%,rgba(255,255,255,0.08) 50%,rgba(255,255,255,0.04) 100%);
+  background-size:200% 100%;
+  animation:shimmer 1.5s infinite;
+  border-radius:var(--radius);
+}
+
+@keyframes shimmer {
+  0% { background-position:200% 0; }
+  100% { background-position:-200% 0; }
+}
+
+.progress-bar-wrap {
+  height:6px;
+  background:rgba(255,255,255,0.06);
+  border-radius:3px;
+  overflow:hidden;
+  margin-top:6px;
+}
+
+.progress-bar-fill {
+  height:100%;
+  border-radius:3px;
+  background:linear-gradient(90deg,var(--wolf-gold),var(--wolf-gold-dim));
+  transition:width 0.6s ease;
+}
+</style>
+</head>
+<body>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- ============ SPLASH SCREEN ============ -->
+<div class="screen active" id="splash">
+  <span class="splash-wolf">🐺</span>
+  <div class="splash-title">WOLFPACK</div>
+  <div class="splash-sub">16-Week Team Challenge</div>
+  <div class="splash-tagline">"Points are for showing up smart, not showing off tired."</div>
+  <div style="display:flex;flex-direction:column;gap:12px;width:100%;max-width:320px;padding:0 24px;">
+    <button class="btn btn-gold btn-lg btn-full" onclick="showScreen('login')">🏃 Member Login</button>
+    <button class="btn btn-outline btn-full" onclick="showScreen('captain-login')">🔐 Captain Access</button>
+  </div>
+  <div style="margin-top:32px;font-size:12px;color:var(--wolf-gray);font-family:var(--font-heading);letter-spacing:1px;">
+    TEAM RAM &nbsp;⚔️&nbsp; TEAM MANO
+  </div>
+</div>
+
+<!-- ============ MEMBER LOGIN ============ -->
+<div class="screen" id="login" style="justify-content:center;padding:24px;">
+  <div style="width:100%;max-width:400px;">
+    <div style="text-align:center;margin-bottom:32px;">
+      <div style="font-size:48px;margin-bottom:12px;">🐺</div>
+      <div class="section-title" style="font-size:36px;">WHO ARE YOU?</div>
+      <div class="section-sub">Select your team and name to continue</div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Select Team</label>
+      <div class="radio-group" id="teamRadio">
+        <div class="radio-btn" onclick="selectTeam('Ram')" id="team-ram">🔴 Team Ram</div>
+        <div class="radio-btn" onclick="selectTeam('Mano')" id="team-mano">🔵 Team Mano</div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Your Name</label>
+      <select class="form-select" id="memberSelect" onchange="onMemberSelect()">
+        <option value="">— Select your name —</option>
+      </select>
+    </div>
+
+    <button class="btn btn-gold btn-full btn-lg" onclick="memberLogin()" style="margin-top:8px;">
+      LET'S GO 🐺
+    </button>
+
+    <button class="btn btn-ghost btn-full btn-sm" onclick="showScreen('splash')" style="margin-top:12px;">
+      ← Back
+    </button>
+  </div>
+</div>
+
+<!-- ============ CAPTAIN LOGIN ============ -->
+<div class="screen" id="captain-login">
+  <div class="login-box">
+    <div class="login-icon">🔐</div>
+    <div class="section-title" style="font-size:36px;margin-bottom:4px;">CAPTAIN</div>
+    <div class="section-sub" style="margin-bottom:28px;">Enter your captain password</div>
+
+    <div class="form-group">
+      <label class="form-label">Captain Name</label>
+      <select class="form-select" id="captainSelect">
+        <option value="">— Select Captain —</option>
+        <option value="Ram">Ram</option>
+        <option value="VP">VP</option>
+        <option value="Mano">Mano</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Password</label>
+      <input type="password" class="form-input" id="captainPassword" placeholder="Enter password" onkeydown="if(event.key==='Enter')captainLogin()">
+    </div>
+
+    <button class="btn btn-gold btn-full btn-lg" onclick="captainLogin()">ENTER 🔐</button>
+    <button class="btn btn-ghost btn-full btn-sm" onclick="showScreen('splash')" style="margin-top:12px;">← Back</button>
+  </div>
+</div>
+
+<!-- ============ MAIN APP (MEMBER) ============ -->
+<div class="screen" id="main-app">
+  <div class="app-header">
+    <div class="header-logo">🐺 WOLFPACK</div>
+    <div class="header-user">
+      <div id="streakDisplay"></div>
+      <div class="user-avatar" id="userAvatar">?</div>
+      <div>
+        <div class="user-name-sm" id="headerUserName">Member</div>
+        <div style="font-size:10px;color:var(--wolf-gray);font-family:var(--font-heading);" id="headerTeamName">Team</div>
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="logout()" style="padding:6px 10px;font-size:11px;">Exit</button>
+    </div>
+  </div>
+
+  <!-- LOG TAB -->
+  <div class="content" id="tab-log">
+    <div style="margin-bottom:20px;">
+      <div class="section-title">LOG ACTIVITY</div>
+      <div class="section-sub" id="todayDateDisplay">Today</div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row" id="weekStats">
+      <div class="stat-card">
+        <div class="stat-value" id="statRun">0</div>
+        <div class="stat-label">Run Pts</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="statStr">0</div>
+        <div class="stat-label">Str Pts</div>
+      </div>
+      <div class="stat-card" style="border-color:var(--wolf-border-bright);">
+        <div class="stat-value" id="statTotal" style="color:var(--wolf-gold);">0</div>
+        <div class="stat-label">Total Pts</div>
+      </div>
+    </div>
+
+    <!-- Already logged today -->
+    <div id="todayLoggedAlert" class="hidden" style="padding:12px 16px;background:rgba(45,198,83,0.08);border:1px solid rgba(45,198,83,0.3);border-radius:var(--radius);margin-bottom:16px;font-family:var(--font-heading);font-size:13px;color:var(--wolf-green);">
+      ✅ You've already logged an activity today. Only the higher score counts.
+    </div>
+
+    <!-- Activity Buttons -->
+    <div class="activity-grid">
+      <div class="activity-btn run" onclick="selectActivity('run')" id="actBtn-run">
+        <button class="act-info-btn" onclick="event.stopPropagation();showLegend('run')">ℹ️</button>
+        <span class="act-icon">🏃</span>
+        <span class="act-label" style="color:var(--wolf-red);">RUN</span>
+      </div>
+      <div class="activity-btn strength" onclick="selectActivity('strength')" id="actBtn-strength">
+        <button class="act-info-btn" onclick="event.stopPropagation();showLegend('strength')">ℹ️</button>
+        <span class="act-icon">💪</span>
+        <span class="act-label" style="color:var(--wolf-gold);">STRENGTH</span>
+      </div>
+      <div class="activity-btn culture" onclick="selectActivity('culture')" id="actBtn-culture">
+        <button class="act-info-btn" onclick="event.stopPropagation();showLegend('culture')">ℹ️</button>
+        <span class="act-icon">🤝</span>
+        <span class="act-label" style="color:var(--wolf-cyan);">CULTURE</span>
+      </div>
+      <div class="activity-btn crosstraining" onclick="selectActivity('crosstraining')" id="actBtn-crosstraining">
+        <button class="act-info-btn" onclick="event.stopPropagation();showLegend('crosstraining')">ℹ️</button>
+        <span class="act-icon">🚴</span>
+        <span class="act-label" style="color:var(--wolf-green);">CROSS<br>TRAIN</span>
+      </div>
+    </div>
+
+    <!-- Options -->
+    <div class="options-container" id="options-run">
+      <div class="options-label">🏃 Select Run Type</div>
+      <div class="option-pills" id="pills-run"></div>
+    </div>
+    <div class="options-container" id="options-strength">
+      <div class="options-label">💪 Select Strength Type</div>
+      <div class="option-pills" id="pills-strength"></div>
+    </div>
+    <div class="options-container" id="options-culture">
+      <div class="options-label">🤝 Select Culture Activity</div>
+      <div class="option-pills" id="pills-culture"></div>
+    </div>
+    <div class="options-container" id="options-crosstraining">
+      <div class="options-label">🚴 Select Cross Training</div>
+      <div class="option-pills" id="pills-crosstraining"></div>
+    </div>
+
+    <!-- Points Flash -->
+    <div class="points-flash" id="pointsFlash">
+      <div class="points-number" id="flashPts">0</div>
+      <div class="points-label">POINTS EARNED</div>
+    </div>
+
+    <!-- Entry Form -->
+    <div id="entryForm" class="hidden">
+      <div class="form-group" id="trackingLinkGroup">
+        <label class="form-label">Activity Tracking Link <span class="required">*</span></label>
+        <input type="url" class="form-input" id="trackingLink" placeholder="https://strava.com/activities/...">
+        <div style="font-size:11px;color:var(--wolf-gray);margin-top:4px;">Strava / Garmin / Google Fit link required (not needed for Ghosted)</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Notes <span style="color:var(--wolf-gray);font-size:11px;">(visible to Captain only)</span></label>
+        <textarea class="form-input" id="entryNotes" placeholder="How did it go? Any niggles?" rows="2"></textarea>
+      </div>
+      <button class="btn btn-green btn-full btn-lg" onclick="saveEntry()">SAVE ENTRY ✓</button>
+    </div>
+
+    <!-- Today's logs -->
+    <div style="margin-top:24px;">
+      <div style="font-family:var(--font-heading);font-size:13px;color:var(--wolf-gray);letter-spacing:1px;text-transform:uppercase;margin-bottom:12px;">Today's Entries</div>
+      <div id="todayLogs"></div>
+    </div>
+  </div>
+
+  <!-- MY WEEK TAB -->
+  <div class="content hidden" id="tab-myweek">
+    <div class="section-title">MY WEEK</div>
+    <div class="section-sub" id="myWeekRange">Week overview</div>
+
+    <div class="stats-row" style="grid-template-columns:repeat(4,1fr);">
+      <div class="stat-card">
+        <div class="stat-value" id="mwRun">0</div>
+        <div class="stat-label">Run</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="mwStr">0</div>
+        <div class="stat-label">Str</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="mwCult">0</div>
+        <div class="stat-label">Culture</div>
+      </div>
+      <div class="stat-card" style="border-color:var(--wolf-border-bright);">
+        <div class="stat-value" style="color:var(--wolf-gold);" id="mwTotal">0</div>
+        <div class="stat-label">Total</div>
+      </div>
+    </div>
+
+    <!-- Heatmap -->
+    <div class="card" style="margin-bottom:16px;">
+      <div style="font-family:var(--font-heading);font-size:12px;color:var(--wolf-gray);letter-spacing:1px;text-transform:uppercase;margin-bottom:12px;">This Week's Activity</div>
+      <div class="heatmap" id="weekHeatmap"></div>
+    </div>
+
+    <!-- All my entries -->
+    <div style="font-family:var(--font-heading);font-size:13px;color:var(--wolf-gray);letter-spacing:1px;text-transform:uppercase;margin-bottom:12px;">My Entries This Week</div>
+    <div id="myEntriesList"></div>
+  </div>
+
+  <!-- LEADERBOARD TAB -->
+  <div class="content hidden" id="tab-leaderboard">
+    <div class="section-title">LEADERBOARD</div>
+
+    <!-- Sunday lock for members -->
+    <div id="sundayLock" class="sunday-lock hidden">
+      <div class="lock-icon">🔒</div>
+      <div class="lock-title">SUNDAY REVEAL</div>
+      <div class="lock-sub">The leaderboard is revealed every Sunday.<br>Keep grinding — results drop <strong style="color:var(--wolf-gold);">this Sunday!</strong></div>
+    </div>
+
+    <div id="leaderboardContent">
+      <div class="tabs">
+        <button class="tab active" onclick="switchLBTab('team')" id="lbTab-team">Within Team</button>
+        <button class="tab" onclick="switchLBTab('all')" id="lbTab-all">Team vs Team</button>
+      </div>
+
+      <!-- Team vs Team -->
+      <div id="lb-teamvsteam" class="hidden">
+        <div class="team-vs">
+          <div class="vs-title">⚔️ TEAM BATTLE</div>
+          <div class="vs-row">
+            <div class="vs-team-name" style="color:var(--wolf-gold);">TEAM RAM</div>
+            <div class="vs-bar-container">
+              <div class="vs-bar ram" id="vsBarRam" style="width:50%"></div>
+            </div>
+            <div class="vs-score" style="color:var(--wolf-gold);" id="vsScoreRam">0</div>
+          </div>
+          <div class="vs-row">
+            <div class="vs-team-name" style="color:var(--wolf-cyan);">TEAM MANO</div>
+            <div class="vs-bar-container">
+              <div class="vs-bar mano" id="vsBarMano" style="width:50%"></div>
+            </div>
+            <div class="vs-score" style="color:var(--wolf-cyan);" id="vsScoreMano">0</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Team leaderboard -->
+      <div id="lb-team">
+        <div style="font-family:var(--font-heading);font-size:12px;color:var(--wolf-gray);letter-spacing:1px;text-transform:uppercase;margin-bottom:12px;" id="lbTeamLabel">Your Team Rankings</div>
+        <div id="lbList"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <div class="bottom-nav">
+    <button class="nav-item active" onclick="switchTab('log')" id="nav-log">
+      <span class="nav-icon">➕</span>Log
+    </button>
+    <button class="nav-item" onclick="switchTab('myweek')" id="nav-myweek">
+      <span class="nav-icon">📅</span>My Week
+    </button>
+    <button class="nav-item" onclick="switchTab('leaderboard')" id="nav-leaderboard">
+      <span class="nav-icon">🏆</span>Board
+    </button>
+  </div>
+</div>
+
+<!-- ============ CAPTAIN APP ============ -->
+<div class="screen" id="captain-app">
+  <div class="app-header">
+    <div class="header-logo">🐺 WOLFPACK</div>
+    <div class="header-user">
+      <span class="captain-badge">⚡ CAPTAIN</span>
+      <div class="user-avatar" style="background:linear-gradient(135deg,var(--wolf-red),#8b0000);" id="captainAvatar">C</div>
+      <button class="btn btn-ghost btn-sm" onclick="logout()" style="padding:6px 10px;font-size:11px;">Exit</button>
+    </div>
+  </div>
+
+  <!-- DASHBOARD TAB -->
+  <div class="content" id="ctab-dashboard">
+    <div class="section-title">COMMAND CENTER</div>
+    <div class="section-sub" id="captainName">Captain View</div>
+
+    <!-- Top Performers -->
+    <div class="card card-gold-border" style="margin-bottom:16px;" id="alertsCard">
+      <div style="font-family:var(--font-heading);font-size:13px;color:var(--wolf-gray);letter-spacing:1px;text-transform:uppercase;margin-bottom:12px;">🌟 Top 5 This Week</div>
+      <div id="alertsList"></div>
+    </div>
+
+    <!-- Team vs Team -->
+    <div class="team-vs" style="margin-bottom:16px;">
+      <div class="vs-title">⚔️ TEAM BATTLE</div>
+      <div class="vs-row">
+        <div class="vs-team-name" style="color:var(--wolf-gold);">TEAM RAM</div>
+        <div class="vs-bar-container">
+          <div class="vs-bar ram" id="cvsBarRam" style="width:50%"></div>
+        </div>
+        <div class="vs-score" style="color:var(--wolf-gold);" id="cvsScoreRam">0</div>
+      </div>
+      <div class="vs-row">
+        <div class="vs-team-name" style="color:var(--wolf-cyan);">TEAM MANO</div>
+        <div class="vs-bar-container">
+          <div class="vs-bar mano" id="cvsBarMano" style="width:50%"></div>
+        </div>
+        <div class="vs-score" style="color:var(--wolf-cyan);" id="cvsScoreMano">0</div>
+      </div>
+    </div>
+
+    <!-- Quick actions -->
+    <div class="captain-section-title">⚡ Quick Actions</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:24px;">
+      <button class="btn btn-outline btn-sm" onclick="openModal('recapModal')">📋 Weekly Recap</button>
+      <button class="btn btn-outline btn-sm" onclick="exportToExcel()">📥 Export Excel</button>
+      <button class="btn btn-outline btn-sm" onclick="switchCTab('members')">👥 Manage Team</button>
+      <button class="btn btn-outline btn-sm" onclick="switchCTab('legends')">🏅 Edit Legends</button>
+    </div>
+
+    <!-- Full leaderboard -->
+    <div class="captain-section-title">🏆 Full Leaderboard</div>
+    <div id="captainLBList"></div>
+  </div>
+
+  <!-- LOGS TAB -->
+  <div class="content hidden" id="ctab-logs">
+    <div class="section-title">ALL ACTIVITY LOGS</div>
+    <div class="section-sub">All entries across all members</div>
+
+    <div class="form-group">
+      <select class="form-select" id="logFilterMember" onchange="renderCaptainLogs()">
+        <option value="">All Members</option>
+      </select>
+    </div>
+
+    <div id="captainLogsList"></div>
+  </div>
+
+  <!-- MEMBERS TAB -->
+  <div class="content hidden" id="ctab-members">
+    <div class="section-title">TEAM MANAGEMENT</div>
+    <div class="section-sub">Add members, manage teams</div>
+
+    <div class="card" style="margin-bottom:16px;">
+      <div style="font-family:var(--font-heading);font-size:13px;color:var(--wolf-gray);letter-spacing:1px;text-transform:uppercase;margin-bottom:12px;">Add New Member</div>
+      <div class="form-group">
+        <input type="text" class="form-input" id="newMemberName" placeholder="Member name">
+      </div>
+      <div class="form-group">
+        <div class="radio-group">
+          <div class="radio-btn" onclick="selectNewMemberTeam('Ram')" id="nmTeam-Ram">Team Ram</div>
+          <div class="radio-btn" onclick="selectNewMemberTeam('Mano')" id="nmTeam-Mano">Team Mano</div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+          <input type="checkbox" id="newMemberIsCaptain">
+          <span style="font-family:var(--font-heading);font-size:14px;">Captain access</span>
+        </label>
+      </div>
+      <button class="btn btn-gold btn-full" onclick="addMember()">+ Add Member</button>
+    </div>
+
+    <div class="captain-section-title">Team Ram</div>
+    <div id="memberListRam"></div>
+
+    <div class="captain-section-title" style="margin-top:16px;">Team Mano</div>
+    <div id="memberListMano"></div>
+  </div>
+
+  <!-- LEGENDS TAB -->
+  <div class="content hidden" id="ctab-legends">
+    <div class="section-title">SCORING LEGENDS</div>
+    <div class="section-sub">Changes apply from tomorrow onward</div>
+
+    <div id="legendsList"></div>
+
+    <div class="card" style="margin-top:16px;">
+      <div style="font-family:var(--font-heading);font-size:13px;color:var(--wolf-gray);letter-spacing:1px;text-transform:uppercase;margin-bottom:12px;">Add New Legend / Sub-option</div>
+      <div class="form-group">
+        <label class="form-label">Category</label>
+        <select class="form-select" id="newLegendCat">
+          <option value="run">Run</option>
+          <option value="strength">Strength</option>
+          <option value="culture">Culture</option>
+          <option value="crosstraining">Cross Training</option>
+          <option value="new">New Category</option>
+        </select>
+      </div>
+      <div class="form-group" id="newCatNameGroup" style="display:none;">
+        <input type="text" class="form-input" id="newCatName" placeholder="New category name">
+      </div>
+      <div class="form-group">
+        <input type="text" class="form-input" id="newLegendName" placeholder="Option name (e.g. Swimming)">
+      </div>
+      <div class="form-group">
+        <input type="number" class="form-input" id="newLegendPts" placeholder="Points (e.g. 8)" min="0" max="20">
+      </div>
+      <button class="btn btn-gold btn-full" onclick="addLegend()">+ Add Option</button>
+    </div>
+
+    <!-- Free Pass -->
+    <div class="card" style="margin-top:16px;">
+      <div style="font-family:var(--font-heading);font-size:13px;color:var(--wolf-gray);letter-spacing:1px;text-transform:uppercase;margin-bottom:12px;">🎟️ Award Free Pass</div>
+      <div class="form-group">
+        <select class="form-select" id="freePassMember">
+          <option value="">Select Member</option>
+        </select>
+      </div>
+      <div style="font-size:12px;color:var(--wolf-gray);margin-bottom:12px;">10 pts awarded. Once per member per month. System auto-locks after award.</div>
+      <button class="btn btn-gold btn-full" onclick="awardFreePass()">🎟️ Award Free Pass</button>
+    </div>
+  </div>
+
+  <!-- BOTTOM NAV CAPTAIN -->
+  <div class="bottom-nav">
+    <button class="nav-item active" onclick="switchCTab('dashboard')" id="cnav-dashboard">
+      <span class="nav-icon">📊</span>Dashboard
+    </button>
+    <button class="nav-item" onclick="switchCTab('logs')" id="cnav-logs">
+      <span class="nav-icon">📋</span>All Logs
+    </button>
+    <button class="nav-item" onclick="switchCTab('members')" id="cnav-members">
+      <span class="nav-icon">👥</span>Team
+    </button>
+    <button class="nav-item" onclick="switchCTab('legends')" id="cnav-legends">
+      <span class="nav-icon">🏅</span>Legends
+    </button>
+  </div>
+</div>
+
+<!-- ============ MODALS ============ -->
+
+<!-- Legend Modal -->
+<div class="modal-overlay" id="legendModal" onclick="if(event.target===this)closeModal('legendModal')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="legendModalTitle">SCORING GUIDE</div>
+    <div class="modal-sub" id="legendModalSub">Points breakdown</div>
+    <table class="legend-table">
+      <thead><tr><th>Activity</th><th>Points</th></tr></thead>
+      <tbody id="legendModalBody"></tbody>
+    </table>
+    <button class="btn btn-ghost btn-full" style="margin-top:20px;" onclick="closeModal('legendModal')">Got it ✓</button>
+  </div>
+</div>
+
+<!-- Recap Modal -->
+<div class="modal-overlay" id="recapModal" onclick="if(event.target===this)closeModal('recapModal')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">📋 WEEKLY RECAP</div>
+    <div class="modal-sub">WhatsApp-ready summary</div>
+    <div class="recap-box" id="recapContent">
+      <div style="text-align:center;padding:20px;color:var(--wolf-gray);">Generating recap...</div>
+    </div>
+    <div class="recap-box" id="recapQuoteBox" style="margin-top:0;">
+      <div style="font-family:var(--font-heading);font-size:11px;color:var(--wolf-gray);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;">AI Motivational Quote for Next Week</div>
+      <div class="recap-quote" id="recapQuote">Loading...</div>
+    </div>
+    <button class="btn btn-gold btn-full" onclick="copyRecap()">📋 Copy for WhatsApp</button>
+    <button class="btn btn-ghost btn-full" style="margin-top:10px;" onclick="closeModal('recapModal')">Close</button>
+  </div>
+</div>
+
+<!-- Edit Entry Modal (Captain) -->
+<div class="modal-overlay" id="editEntryModal" onclick="if(event.target===this)closeModal('editEntryModal')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">EDIT ENTRY</div>
+    <div class="modal-sub" id="editEntryInfo">Entry details</div>
+    <div class="form-group">
+      <label class="form-label">Notes (Captain view)</label>
+      <textarea class="form-input" id="editEntryNotes" rows="3"></textarea>
+    </div>
+    <button class="btn btn-gold btn-full" onclick="saveEditEntry()">Save Changes</button>
+    <button class="btn btn-red btn-full" style="margin-top:8px;" onclick="deleteEntry()">🗑️ Delete Entry</button>
+    <button class="btn btn-ghost btn-full" style="margin-top:8px;" onclick="closeModal('editEntryModal')">Cancel</button>
+  </div>
+</div>
+
+<script>
+// ===================== DATA STORE =====================
+const CAPTAIN_PASSWORDS = { Ram: 'wolfram2026', VP: 'wolfvp2026', Mano: 'wolfmano2026' };
+
+const DEFAULT_MEMBERS = {
+  Ram: [
+    { name: 'Ram', isCapt: true },
+    { name: 'VP', isCapt: true },
+    { name: 'Rahul', isCapt: false },
+    { name: 'Pradheep', isCapt: false },
+    { name: 'Kirupa', isCapt: false },
+    { name: 'Raghu', isCapt: false },
+    { name: 'Poonthamizhan', isCapt: false },
+    { name: 'Sanjeev', isCapt: false },
+    { name: 'Priya', isCapt: false },
+    { name: 'Kalai', isCapt: false },
+    { name: 'Sandy', isCapt: false },
+    { name: 'Aathi', isCapt: false },
+  ],
+  Mano: [
+    { name: 'Mano', isCapt: true },
+    { name: 'Arjun', isCapt: false },
+    { name: 'Anush', isCapt: false },
+    { name: 'Anitha', isCapt: false },
+    { name: 'Bibek', isCapt: false },
+    { name: 'Raashi', isCapt: false },
+    { name: 'Strom', isCapt: false },
+    { name: 'Sethu', isCapt: false },
+    { name: 'Ravi', isCapt: false },
+    { name: 'UK', isCapt: false },
+    { name: 'Usha', isCapt: false },
+  ]
+};
+
+const DEFAULT_LEGENDS = {
+  run: [
+    { name: 'Completed as per plan', pts: 10 },
+    { name: 'Modified but showed up', pts: 7 },
+    { name: 'Informed miss (rest/niggle)', pts: 1 },
+    { name: 'Ghosted', pts: 0 },
+  ],
+  strength: [
+    { name: 'Full session', pts: 10 },
+    { name: 'Mobility / Rehab / Cross Training', pts: 5 },
+  ],
+  culture: [
+    { name: 'Inspire a newbie to run', pts: 10 },
+    { name: 'Pacing a teammate', pts: 3 },
+  ],
+  crosstraining: [
+    { name: 'Swimming', pts: 10 },
+    { name: 'Cycling', pts: 10 },
+  ]
+};
+
+// App State
+let state = {
+  currentUser: null,
+  currentTeam: null,
+  isCapt: false,
+  currentCapt: null,
+  selectedActivity: null,
+  selectedOption: null,
+  selectedOptionPts: 0,
+  editingEntryId: null,
+  newMemberTeam: null,
+  lbTab: 'team',
+};
+
+// Storage helpers — localStorage based (works on GitHub Pages, iOS Safari, Android)
+async function storageGet(key) {
+  try { const v = localStorage.getItem('wolfpack_' + key); return v ? { value: v } : null; } catch(e) { return null; }
+}
+
+async function storageSet(key, val) {
+  try { localStorage.setItem('wolfpack_' + key, JSON.stringify(val)); return true; } catch(e) { return null; }
+}
+
+async function storageGetParsed(key, def) {
+  try {
+    const v = localStorage.getItem('wolfpack_' + key);
+    if (!v) return def;
+    return JSON.parse(v);
+  } catch(e) { return def; }
+}
+
+// ===================== PRELOADED WEEK 1 DATA =====================
+const WEEK1 = 'Feb 23 – Mar 1';
+
+const PRELOADED_ENTRIES = [
+  // ── TEAM RAM ──
+  // Ram: Tue Run R=10, Wed Str S=10, Thu Run R=10, Sat Run R=10
+  {id:'pre_ram_tue_run', member:'Ram (Captain)', team:'Ram', date:'2026-02-24', week:WEEK1, activity:'run', option:'Completed as per plan', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-24T07:00:00Z', counted:true},
+  {id:'pre_ram_wed_str', member:'Ram (Captain)', team:'Ram', date:'2026-02-25', week:WEEK1, activity:'strength', option:'Full session', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-25T07:00:00Z', counted:true},
+  {id:'pre_ram_thu_run', member:'Ram (Captain)', team:'Ram', date:'2026-02-26', week:WEEK1, activity:'run', option:'Completed as per plan', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-26T07:00:00Z', counted:true},
+  {id:'pre_ram_sat_run', member:'Ram (Captain)', team:'Ram', date:'2026-02-28', week:WEEK1, activity:'run', option:'Completed as per plan', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-28T07:00:00Z', counted:true},
+
+  // VP: Tue Run R=10, Thu Run R=10, Sat Str S=10, Sun Run R=10
+  {id:'pre_vp_tue_run', member:'VP', team:'Ram', date:'2026-02-24', week:WEEK1, activity:'run', option:'Completed as per plan', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-24T07:00:00Z', counted:true},
+  {id:'pre_vp_thu_run', member:'VP', team:'Ram', date:'2026-02-26', week:WEEK1, activity:'run', option:'Completed as per plan', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-26T07:00:00Z', counted:true},
+  {id:'pre_vp_sat_str', member:'VP', team:'Ram', date:'2026-02-28', week:WEEK1, activity:'strength', option:'Full session', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-28T07:00:00Z', counted:true},
+  {id:'pre_vp_sun_run', member:'VP', team:'Ram', date:'2026-03-01', week:WEEK1, activity:'run', option:'Completed as per plan', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-03-01T07:00:00Z', counted:true},
+
+  // Rahul: Wed Str S=10, Wed Run M=7(not counted, str higher), Thu Informed I=1, Fri Run R=10, Sun Run R=10
+  {id:'pre_rahul_wed_str', member:'Rahul', team:'Ram', date:'2026-02-25', week:WEEK1, activity:'strength', option:'Full session', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-25T07:00:00Z', counted:true},
+  {id:'pre_rahul_wed_run', member:'Rahul', team:'Ram', date:'2026-02-25', week:WEEK1, activity:'run', option:'Modified but showed up', pts:7, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-25T08:00:00Z', counted:false},
+  {id:'pre_rahul_thu_inf', member:'Rahul', team:'Ram', date:'2026-02-26', week:WEEK1, activity:'run', option:'Informed miss (rest/niggle)', pts:1, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-26T07:00:00Z', counted:true},
+  {id:'pre_rahul_fri_run', member:'Rahul', team:'Ram', date:'2026-02-27', week:WEEK1, activity:'run', option:'Completed as per plan', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-27T07:00:00Z', counted:true},
+  {id:'pre_rahul_sun_run', member:'Rahul', team:'Ram', date:'2026-03-01', week:WEEK1, activity:'run', option:'Completed as per plan', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-03-01T07:00:00Z', counted:true},
+
+  // Pradheep: Wed Run M=7, Wed Str S=10(higher, counted), Thu Run R=10
+  {id:'pre_pradheep_wed_run', member:'Pradheep', team:'Ram', date:'2026-02-25', week:WEEK1, activity:'run', option:'Modified but showed up', pts:7, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-25T07:00:00Z', counted:false},
+  {id:'pre_pradheep_wed_str', member:'Pradheep', team:'Ram', date:'2026-02-25', week:WEEK1, activity:'strength', option:'Full session', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-25T08:00:00Z', counted:true},
+  {id:'pre_pradheep_thu_run', member:'Pradheep', team:'Ram', date:'2026-02-26', week:WEEK1, activity:'run', option:'Completed as per plan', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-26T07:00:00Z', counted:true},
+
+  // Kirupa: Tue Run R=10, Wed Str S=10, Thu Run R=10, Sat Str S=10, Sun Run R=10
+  {id:'pre_kirupa_tue_run', member:'Kirupa', team:'Ram', date:'2026-02-24', week:WEEK1, activity:'run', option:'Completed as per plan', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-24T07:00:00Z', counted:true},
+  {id:'pre_kirupa_wed_str', member:'Kirupa', team:'Ram', date:'2026-02-25', week:WEEK1, activity:'strength', option:'Full session', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-25T07:00:00Z', counted:true},
+  {id:'pre_kirupa_thu_run', member:'Kirupa', team:'Ram', date:'2026-02-26', week:WEEK1, activity:'run', option:'Completed as per plan', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-26T07:00:00Z', counted:true},
+  {id:'pre_kirupa_sat_str', member:'Kirupa', team:'Ram', date:'2026-02-28', week:WEEK1, activity:'strength', option:'Full session', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-28T07:00:00Z', counted:true},
+  {id:'pre_kirupa_sun_run', member:'Kirupa', team:'Ram', date:'2026-03-01', week:WEEK1, activity:'run', option:'Completed as per plan', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-03-01T07:00:00Z', counted:true},
+
+  // Rags: Tue Run R=10, Thu Str S=10, Thu Run R=10(same day, both 10, first counted), Fri Run R=10, Sun Run R=10
+  {id:'pre_rags_tue_run', member:'Rags', team:'Ram', date:'2026-02-24', week:WEEK1, activity:'run', option:'Completed as per plan', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-24T07:00:00Z', counted:true},
+  {id:'pre_rags_thu_str', member:'Rags', team:'Ram', date:'2026-02-26', week:WEEK1, activity:'strength', option:'Full session', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-26T07:00:00Z', counted:true},
+  {id:'pre_rags_fri_run', member:'Rags', team:'Ram', date:'2026-02-27', week:WEEK1, activity:'run', option:'Completed as per plan', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-27T07:00:00Z', counted:true},
+  {id:'pre_rags_sun_run', member:'Rags', team:'Ram', date:'2026-03-01', week:WEEK1, activity:'run', option:'Completed as per plan', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-03-01T07:00:00Z', counted:true},
+
+  // Poonthamizhan: Tue Informed I=1, Wed Str S=10, Thu Run R=10, Sat Str S=10
+  {id:'pre_poon_tue_inf', member:'Poonthamizhan', team:'Ram', date:'2026-02-24', week:WEEK1, activity:'run', option:'Informed miss (rest/niggle)', pts:1, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-24T07:00:00Z', counted:true},
+  {id:'pre_poon_wed_str', member:'Poonthamizhan', team:'Ram', date:'2026-02-25', week:WEEK1, activity:'strength', option:'Full session', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-25T07:00:00Z', counted:true},
+  {id:'pre_poon_thu_run', member:'Poonthamizhan', team:'Ram', date:'2026-02-26', week:WEEK1, activity:'run', option:'Completed as per plan', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-26T07:00:00Z', counted:true},
+  {id:'pre_poon_sat_str', member:'Poonthamizhan', team:'Ram', date:'2026-02-28', week:WEEK1, activity:'strength', option:'Full session', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-28T07:00:00Z', counted:true},
+
+  // Sanjeev: Tue Run R=10, Wed Str S=10, Thu Run R=10, Sat Str S=10, Sun Run R=10
+  {id:'pre_sanjeev_tue_run', member:'Sanjeev', team:'Ram', date:'2026-02-24', week:WEEK1, activity:'run', option:'Completed as per plan', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-24T07:00:00Z', counted:true},
+  {id:'pre_sanjeev_wed_str', member:'Sanjeev', team:'Ram', date:'2026-02-25', week:WEEK1, activity:'strength', option:'Full session', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-25T07:00:00Z', counted:true},
+  {id:'pre_sanjeev_thu_run', member:'Sanjeev', team:'Ram', date:'2026-02-26', week:WEEK1, activity:'run', option:'Completed as per plan', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-26T07:00:00Z', counted:true},
+  {id:'pre_sanjeev_sat_str', member:'Sanjeev', team:'Ram', date:'2026-02-28', week:WEEK1, activity:'strength', option:'Full session', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-28T07:00:00Z', counted:true},
+  {id:'pre_sanjeev_sun_run', member:'Sanjeev', team:'Ram', date:'2026-03-01', week:WEEK1, activity:'run', option:'Completed as per plan', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-03-01T07:00:00Z', counted:true},
+
+  // Priya: Tue Ghosted G=0, Thu Run R=10
+  {id:'pre_priya_tue_ghost', member:'Priya', team:'Ram', date:'2026-02-24', week:WEEK1, activity:'run', option:'Ghosted', pts:0, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-24T07:00:00Z', counted:true},
+  {id:'pre_priya_thu_run', member:'Priya', team:'Ram', date:'2026-02-26', week:WEEK1, activity:'run', option:'Completed as per plan', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-26T07:00:00Z', counted:true},
+
+  // Kalai: Tue Ghosted G=0, Wed Run R=10, Thu Run R=10, Fri Run R=10
+  {id:'pre_kalai_tue_ghost', member:'Kalai', team:'Ram', date:'2026-02-24', week:WEEK1, activity:'run', option:'Ghosted', pts:0, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-24T07:00:00Z', counted:true},
+  {id:'pre_kalai_wed_run', member:'Kalai', team:'Ram', date:'2026-02-25', week:WEEK1, activity:'run', option:'Completed as per plan', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-25T07:00:00Z', counted:true},
+  {id:'pre_kalai_thu_run', member:'Kalai', team:'Ram', date:'2026-02-26', week:WEEK1, activity:'run', option:'Completed as per plan', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-26T07:00:00Z', counted:true},
+  {id:'pre_kalai_fri_run', member:'Kalai', team:'Ram', date:'2026-02-27', week:WEEK1, activity:'run', option:'Completed as per plan', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-27T07:00:00Z', counted:true},
+
+  // Sandy: Tue Informed I=1, Wed Str S=10, Thu Run R=10, Fri Run R=10
+  {id:'pre_sandy_tue_inf', member:'Sandy', team:'Ram', date:'2026-02-24', week:WEEK1, activity:'run', option:'Informed miss (rest/niggle)', pts:1, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-24T07:00:00Z', counted:true},
+  {id:'pre_sandy_wed_str', member:'Sandy', team:'Ram', date:'2026-02-25', week:WEEK1, activity:'strength', option:'Full session', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-25T07:00:00Z', counted:true},
+  {id:'pre_sandy_thu_run', member:'Sandy', team:'Ram', date:'2026-02-26', week:WEEK1, activity:'run', option:'Completed as per plan', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-26T07:00:00Z', counted:true},
+  {id:'pre_sandy_fri_run', member:'Sandy', team:'Ram', date:'2026-02-27', week:WEEK1, activity:'run', option:'Completed as per plan', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-27T07:00:00Z', counted:true},
+
+  // Aathi: Tue Run R=10, Wed Run R=10, Thu Run R=10, Sat Str S=10, Fri Run R=10
+  {id:'pre_aathi_tue_run', member:'Aathi', team:'Ram', date:'2026-02-24', week:WEEK1, activity:'run', option:'Completed as per plan', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-24T07:00:00Z', counted:true},
+  {id:'pre_aathi_wed_run', member:'Aathi', team:'Ram', date:'2026-02-25', week:WEEK1, activity:'run', option:'Completed as per plan', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-25T07:00:00Z', counted:true},
+  {id:'pre_aathi_thu_run', member:'Aathi', team:'Ram', date:'2026-02-26', week:WEEK1, activity:'run', option:'Completed as per plan', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-26T07:00:00Z', counted:true},
+  {id:'pre_aathi_fri_run', member:'Aathi', team:'Ram', date:'2026-02-27', week:WEEK1, activity:'run', option:'Completed as per plan', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-27T07:00:00Z', counted:true},
+  {id:'pre_aathi_sat_str', member:'Aathi', team:'Ram', date:'2026-02-28', week:WEEK1, activity:'strength', option:'Full session', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-28T07:00:00Z', counted:true},
+
+  // ── TEAM MANO ──
+  // Mano: Tue Run R=10, Wed Str S=10, Thu Run R=10, Fri Str S=10, Sat Run R=10
+  {id:'pre_mano_tue_run', member:'Mano', team:'Mano', date:'2026-02-24', week:WEEK1, activity:'run', option:'Completed as per plan', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-24T07:00:00Z', counted:true},
+  {id:'pre_mano_wed_str', member:'Mano', team:'Mano', date:'2026-02-25', week:WEEK1, activity:'strength', option:'Full session', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-25T07:00:00Z', counted:true},
+  {id:'pre_mano_thu_run', member:'Mano', team:'Mano', date:'2026-02-26', week:WEEK1, activity:'run', option:'Completed as per plan', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-26T07:00:00Z', counted:true},
+  {id:'pre_mano_fri_str', member:'Mano', team:'Mano', date:'2026-02-27', week:WEEK1, activity:'strength', option:'Full session', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-27T07:00:00Z', counted:true},
+  {id:'pre_mano_sat_run', member:'Mano', team:'Mano', date:'2026-02-28', week:WEEK1, activity:'run', option:'Completed as per plan', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-28T07:00:00Z', counted:true},
+
+  // Arjun: Tue Run R=10, Wed Str S=10, Thu Run R=10, Fri CrossTrain X=5, Sat Run R=10
+  {id:'pre_arjun_tue_run', member:'Arjun', team:'Mano', date:'2026-02-24', week:WEEK1, activity:'run', option:'Completed as per plan', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-24T07:00:00Z', counted:true},
+  {id:'pre_arjun_wed_str', member:'Arjun', team:'Mano', date:'2026-02-25', week:WEEK1, activity:'strength', option:'Full session', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-25T07:00:00Z', counted:true},
+  {id:'pre_arjun_thu_run', member:'Arjun', team:'Mano', date:'2026-02-26', week:WEEK1, activity:'run', option:'Completed as per plan', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-26T07:00:00Z', counted:true},
+  {id:'pre_arjun_fri_xt', member:'Arjun', team:'Mano', date:'2026-02-27', week:WEEK1, activity:'crosstraining', option:'Mobility / Rehab / Cross Training', pts:5, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-27T07:00:00Z', counted:true},
+  {id:'pre_arjun_sat_run', member:'Arjun', team:'Mano', date:'2026-02-28', week:WEEK1, activity:'run', option:'Completed as per plan', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-28T07:00:00Z', counted:true},
+
+  // Anush: Tue Run R=10, Wed Str S=10, Thu Run R=10, Fri Str S=10, Sun Run R=10
+  {id:'pre_anush_tue_run', member:'Anush', team:'Mano', date:'2026-02-24', week:WEEK1, activity:'run', option:'Completed as per plan', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-24T07:00:00Z', counted:true},
+  {id:'pre_anush_wed_str', member:'Anush', team:'Mano', date:'2026-02-25', week:WEEK1, activity:'strength', option:'Full session', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-25T07:00:00Z', counted:true},
+  {id:'pre_anush_thu_run', member:'Anush', team:'Mano', date:'2026-02-26', week:WEEK1, activity:'run', option:'Completed as per plan', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-26T07:00:00Z', counted:true},
+  {id:'pre_anush_fri_str', member:'Anush', team:'Mano', date:'2026-02-27', week:WEEK1, activity:'strength', option:'Full session', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-27T07:00:00Z', counted:true},
+  {id:'pre_anush_sun_run', member:'Anush', team:'Mano', date:'2026-03-01', week:WEEK1, activity:'run', option:'Completed as per plan', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-03-01T07:00:00Z', counted:true},
+
+  // Anitha: Tue Run R=10, Wed CrossTrain X=5, Thu Run R=10, Fri CrossTrain X=5, Sun Run R=10
+  {id:'pre_anitha_tue_run', member:'Anitha', team:'Mano', date:'2026-02-24', week:WEEK1, activity:'run', option:'Completed as per plan', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-24T07:00:00Z', counted:true},
+  {id:'pre_anitha_wed_xt', member:'Anitha', team:'Mano', date:'2026-02-25', week:WEEK1, activity:'crosstraining', option:'Mobility / Rehab / Cross Training', pts:5, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-25T07:00:00Z', counted:true},
+  {id:'pre_anitha_thu_run', member:'Anitha', team:'Mano', date:'2026-02-26', week:WEEK1, activity:'run', option:'Completed as per plan', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-26T07:00:00Z', counted:true},
+  {id:'pre_anitha_fri_xt', member:'Anitha', team:'Mano', date:'2026-02-27', week:WEEK1, activity:'crosstraining', option:'Mobility / Rehab / Cross Training', pts:5, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-27T07:00:00Z', counted:true},
+  {id:'pre_anitha_sun_run', member:'Anitha', team:'Mano', date:'2026-03-01', week:WEEK1, activity:'run', option:'Completed as per plan', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-03-01T07:00:00Z', counted:true},
+
+  // Bibek: Tue Modified M=7, Wed Ghosted G=0, Thu Run R=10, Fri Str S=10, Sat Run R=10
+  {id:'pre_bibek_tue_mod', member:'Bibek', team:'Mano', date:'2026-02-24', week:WEEK1, activity:'run', option:'Modified but showed up', pts:7, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-24T07:00:00Z', counted:true},
+  {id:'pre_bibek_wed_ghost', member:'Bibek', team:'Mano', date:'2026-02-25', week:WEEK1, activity:'run', option:'Ghosted', pts:0, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-25T07:00:00Z', counted:true},
+  {id:'pre_bibek_thu_run', member:'Bibek', team:'Mano', date:'2026-02-26', week:WEEK1, activity:'run', option:'Completed as per plan', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-26T07:00:00Z', counted:true},
+  {id:'pre_bibek_fri_str', member:'Bibek', team:'Mano', date:'2026-02-27', week:WEEK1, activity:'strength', option:'Full session', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-27T07:00:00Z', counted:true},
+  {id:'pre_bibek_sat_run', member:'Bibek', team:'Mano', date:'2026-02-28', week:WEEK1, activity:'run', option:'Completed as per plan', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-28T07:00:00Z', counted:true},
+
+  // Raashi: Tue Ghosted G=0, Wed Ghosted G=0, Thu Ghosted G=0
+  {id:'pre_raashi_tue_ghost', member:'Raashi', team:'Mano', date:'2026-02-24', week:WEEK1, activity:'run', option:'Ghosted', pts:0, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-24T07:00:00Z', counted:true},
+  {id:'pre_raashi_wed_ghost', member:'Raashi', team:'Mano', date:'2026-02-25', week:WEEK1, activity:'run', option:'Ghosted', pts:0, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-25T07:00:00Z', counted:true},
+  {id:'pre_raashi_thu_ghost', member:'Raashi', team:'Mano', date:'2026-02-26', week:WEEK1, activity:'run', option:'Ghosted', pts:0, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-26T07:00:00Z', counted:true},
+
+  // Strom: Tue Run R=10, Wed Str S=10, Thu Run R=10, Fri Str S=10, Sat Run R=10
+  {id:'pre_strom_tue_run', member:'Strom', team:'Mano', date:'2026-02-24', week:WEEK1, activity:'run', option:'Completed as per plan', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-24T07:00:00Z', counted:true},
+  {id:'pre_strom_wed_str', member:'Strom', team:'Mano', date:'2026-02-25', week:WEEK1, activity:'strength', option:'Full session', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-25T07:00:00Z', counted:true},
+  {id:'pre_strom_thu_run', member:'Strom', team:'Mano', date:'2026-02-26', week:WEEK1, activity:'run', option:'Completed as per plan', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-26T07:00:00Z', counted:true},
+  {id:'pre_strom_fri_str', member:'Strom', team:'Mano', date:'2026-02-27', week:WEEK1, activity:'strength', option:'Full session', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-27T07:00:00Z', counted:true},
+  {id:'pre_strom_sat_run', member:'Strom', team:'Mano', date:'2026-02-28', week:WEEK1, activity:'run', option:'Completed as per plan', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-28T07:00:00Z', counted:true},
+
+  // Sethu: Tue Run R=10, Wed Str S=10, Thu Run R=10, Fri Str S=10 (not shown but pattern), Sun Run R=10
+  {id:'pre_sethu_tue_run', member:'Sethu', team:'Mano', date:'2026-02-24', week:WEEK1, activity:'run', option:'Completed as per plan', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-24T07:00:00Z', counted:true},
+  {id:'pre_sethu_wed_str', member:'Sethu', team:'Mano', date:'2026-02-25', week:WEEK1, activity:'strength', option:'Full session', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-25T07:00:00Z', counted:true},
+  {id:'pre_sethu_thu_run', member:'Sethu', team:'Mano', date:'2026-02-26', week:WEEK1, activity:'run', option:'Completed as per plan', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-26T07:00:00Z', counted:true},
+  {id:'pre_sethu_sun_run', member:'Sethu', team:'Mano', date:'2026-03-01', week:WEEK1, activity:'run', option:'Completed as per plan', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-03-01T07:00:00Z', counted:true},
+
+  // Ravi: Tue Run R=10, Wed Str S=10, Thu Run R=10, Sun Run R=10
+  {id:'pre_ravi_tue_run', member:'Ravi', team:'Mano', date:'2026-02-24', week:WEEK1, activity:'run', option:'Completed as per plan', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-24T07:00:00Z', counted:true},
+  {id:'pre_ravi_wed_str', member:'Ravi', team:'Mano', date:'2026-02-25', week:WEEK1, activity:'strength', option:'Full session', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-25T07:00:00Z', counted:true},
+  {id:'pre_ravi_thu_run', member:'Ravi', team:'Mano', date:'2026-02-26', week:WEEK1, activity:'run', option:'Completed as per plan', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-26T07:00:00Z', counted:true},
+  {id:'pre_ravi_sun_run', member:'Ravi', team:'Mano', date:'2026-03-01', week:WEEK1, activity:'run', option:'Completed as per plan', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-03-01T07:00:00Z', counted:true},
+
+  // UK: Tue Run R=10, Wed Str S=10, Thu Run R=10, Fri Str S=10
+  {id:'pre_uk_tue_run', member:'UK', team:'Mano', date:'2026-02-24', week:WEEK1, activity:'run', option:'Completed as per plan', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-24T07:00:00Z', counted:true},
+  {id:'pre_uk_wed_str', member:'UK', team:'Mano', date:'2026-02-25', week:WEEK1, activity:'strength', option:'Full session', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-25T07:00:00Z', counted:true},
+  {id:'pre_uk_thu_run', member:'UK', team:'Mano', date:'2026-02-26', week:WEEK1, activity:'run', option:'Completed as per plan', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-26T07:00:00Z', counted:true},
+  {id:'pre_uk_sat_str', member:'UK', team:'Mano', date:'2026-02-28', week:WEEK1, activity:'strength', option:'Full session', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-28T07:00:00Z', counted:true},
+
+  // Usha: Tue Run R=10, Wed Str S=10, Thu Run R=10, Fri Str S=10, Sat Run R=10
+  {id:'pre_usha_tue_run', member:'Usha', team:'Mano', date:'2026-02-24', week:WEEK1, activity:'run', option:'Completed as per plan', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-24T07:00:00Z', counted:true},
+  {id:'pre_usha_wed_str', member:'Usha', team:'Mano', date:'2026-02-25', week:WEEK1, activity:'strength', option:'Full session', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-25T07:00:00Z', counted:true},
+  {id:'pre_usha_thu_run', member:'Usha', team:'Mano', date:'2026-02-26', week:WEEK1, activity:'run', option:'Completed as per plan', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-26T07:00:00Z', counted:true},
+  {id:'pre_usha_fri_str', member:'Usha', team:'Mano', date:'2026-02-27', week:WEEK1, activity:'strength', option:'Full session', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-27T07:00:00Z', counted:true},
+  {id:'pre_usha_sat_run', member:'Usha', team:'Mano', date:'2026-02-28', week:WEEK1, activity:'run', option:'Completed as per plan', pts:10, trackingLink:'#preloaded', notes:'', timestamp:'2026-02-28T07:00:00Z', counted:true},
+];
+
+// ===================== INIT =====================
+async function init() {
+  // Initialize defaults if not set
+  const members = await storageGetParsed('members', null);
+  if (!members) await storageSet('members', DEFAULT_MEMBERS);
+
+  const legends = await storageGetParsed('legends', null);
+  if (!legends) await storageSet('legends', DEFAULT_LEGENDS);
+
+  // Load preloaded entries once
+  const preloaded = await storageGetParsed('preloaded_done', false);
+  if (!preloaded) {
+    const existing = await storageGetParsed('entries', []);
+    const merged = [...existing];
+    PRELOADED_ENTRIES.forEach(pe => {
+      if (!merged.find(e => e.id === pe.id)) merged.push(pe);
+    });
+    await storageSet('entries', merged);
+    await storageSet('preloaded_done', true);
+  }
+
+  // Check saved session
+  const savedUser = await storageGetParsed('session', null);
+  if (savedUser && savedUser.name) {
+    state.currentUser = savedUser.name;
+    state.currentTeam = savedUser.team;
+    state.isCapt = savedUser.isCapt || false;
+    if (state.isCapt) {
+      state.currentCapt = savedUser.name;
+      await launchCaptainWithLog();
+    } else {
+      await launchMemberApp();
+    }
+  }
+}
+
+// ===================== SCREEN NAV =====================
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// ===================== LOGIN =====================
+function selectTeam(team) {
+  state.currentTeam = team;
+  document.getElementById('team-ram').classList.toggle('selected', team === 'Ram');
+  document.getElementById('team-mano').classList.toggle('selected', team === 'Mano');
+  populateMemberSelect(team);
+}
+
+async function populateMemberSelect(team) {
+  const members = await storageGetParsed('members', DEFAULT_MEMBERS);
+  const sel = document.getElementById('memberSelect');
+  sel.innerHTML = '<option value="">— Select your name —</option>';
+  (members[team] || []).forEach(m => {
+    const o = document.createElement('option');
+    o.value = m.name;
+    o.textContent = m.name + (m.isCapt ? ' ⚡' : '');
+    sel.appendChild(o);
+  });
+}
+
+async function onMemberSelect() {
+  const name = document.getElementById('memberSelect').value;
+  if (!name) return;
+  // Auto-detect team if not selected
+  if (!state.currentTeam) {
+    const members = await storageGetParsed('members', DEFAULT_MEMBERS);
+    for (const [t, list] of Object.entries(members)) {
+      if (list.find(m => m.name === name)) {
+        state.currentTeam = t;
+        document.getElementById(`team-${t.toLowerCase()}`).classList.add('selected');
+        break;
+      }
+    }
+  }
+}
+
+async function memberLogin() {
+  const name = document.getElementById('memberSelect').value;
+  if (!name) { showToast('Please select your name'); return; }
+  if (!state.currentTeam) { showToast('Please select your team'); return; }
+
+  const members = await storageGetParsed('members', DEFAULT_MEMBERS);
+  const teamMembers = members[state.currentTeam] || [];
+  const member = teamMembers.find(m => m.name === name);
+  if (!member) { showToast('Member not found'); return; }
+
+  state.currentUser = name;
+  state.isCapt = member.isCapt || false;
+
+  await storageSet('session', { name, team: state.currentTeam, isCapt: state.isCapt });
+
+  if (state.isCapt) {
+    state.currentCapt = name;
+    // Captains get logging screen first, with captain panel accessible
+    await launchCaptainWithLog();
+  } else {
+    await launchMemberApp();
+  }
+}
+
+async function captainLogin() {
+  const name = document.getElementById('captainSelect').value;
+  const pass = document.getElementById('captainPassword').value;
+  if (!name || !pass) { showToast('Fill all fields'); return; }
+  if (CAPTAIN_PASSWORDS[name] !== pass) { showToast('Wrong password! 🔐'); return; }
+
+  state.currentCapt = name;
+  state.currentUser = name;
+  state.isCapt = true;
+
+  // Find team
+  const members = await storageGetParsed('members', DEFAULT_MEMBERS);
+  for (const [t, list] of Object.entries(members)) {
+    if (list.find(m => m.name === name)) { state.currentTeam = t; break; }
+  }
+  if (!state.currentTeam) state.currentTeam = 'Ram';
+
+  await storageSet('session', { name, team: state.currentTeam, isCapt: true });
+  // Captains see log screen first
+  await launchCaptainWithLog();
+}
+
+function logout() {
+  storageSet('session', null);
+  state = { currentUser:null, currentTeam:null, isCapt:false, currentCapt:null, selectedActivity:null, selectedOption:null, selectedOptionPts:0, editingEntryId:null, newMemberTeam:null, lbTab:'team' };
+  showScreen('splash');
+}
+
+// ===================== MEMBER APP =====================
+async function launchMemberApp() {
+  showScreen('main-app');
+  document.getElementById('userAvatar').textContent = state.currentUser.charAt(0).toUpperCase();
+  document.getElementById('headerUserName').textContent = state.currentUser;
+  document.getElementById('headerTeamName').textContent = 'Team ' + state.currentTeam;
+  document.getElementById('todayDateDisplay').textContent = formatDate(new Date());
+
+  await renderActivityButtons();
+  await renderTodayLogs();
+  await updateWeekStats();
+  await renderStreak();
+  switchTab('log');
+}
+
+// Fix: Captain can also log entries — route them through member app
+async function launchCaptainWithLog() {
+  // Captains can switch between logging and captain view
+  await launchMemberApp();
+  // Add captain switcher button to nav
+  const nav = document.querySelector('#main-app .bottom-nav');
+  if (!document.getElementById('nav-captain')) {
+    const btn = document.createElement('button');
+    btn.className = 'nav-item';
+    btn.id = 'nav-captain';
+    btn.innerHTML = '<span class="nav-icon">🔐</span>Captain';
+    btn.onclick = () => launchCaptainApp();
+    nav.appendChild(btn);
+  }
+}
+
+async function renderActivityButtons() {
+  const legends = await storageGetParsed('legends', DEFAULT_LEGENDS);
+  ['run','strength','culture','crosstraining'].forEach(cat => {
+    const container = document.getElementById('pills-' + cat);
+    container.innerHTML = '';
+    const items = legends[cat] || [];
+    items.forEach((item, i) => {
+      const pill = document.createElement('div');
+      pill.className = 'option-pill';
+      pill.innerHTML = `${item.name} <span style="font-size:11px;opacity:0.7;">(${item.pts}pts)</span>`;
+      pill.onclick = () => selectOption(cat, item.name, item.pts, i, pill);
+      container.appendChild(pill);
+    });
+  });
+  // Extra categories
+  const cats = Object.keys(legends).filter(k => !['run','strength','culture','crosstraining'].includes(k));
+  // Future: render extra category buttons
+}
+
+function selectActivity(type) {
+  state.selectedActivity = type;
+  state.selectedOption = null;
+  state.selectedOptionPts = 0;
+
+  ['run','strength','culture','crosstraining'].forEach(t => {
+    document.getElementById('actBtn-' + t).classList.toggle('selected', t === type);
+    const opts = document.getElementById('options-' + t);
+    if (t === type) opts.classList.add('visible');
+    else opts.classList.remove('visible');
+  });
+
+  document.getElementById('pointsFlash').classList.remove('visible');
+  document.getElementById('entryForm').classList.add('hidden');
+  // Clear pill selections
+  document.querySelectorAll('.option-pill').forEach(p => p.className = 'option-pill');
+}
+
+function selectOption(cat, name, pts, idx, pillEl) {
+  state.selectedOption = name;
+  state.selectedOptionPts = pts;
+
+  // Clear same-category pills
+  document.querySelectorAll(`#pills-${cat} .option-pill`).forEach(p => p.className = 'option-pill');
+  pillEl.classList.add('selected-' + cat);
+
+  document.getElementById('flashPts').textContent = pts;
+  document.getElementById('pointsFlash').classList.add('visible');
+  document.getElementById('entryForm').classList.remove('hidden');
+  toggleLinkField(name);
+}
+
+async function saveEntry() {
+  if (!state.selectedActivity || !state.selectedOption) { showToast('Select an activity first'); return; }
+
+  const isGhosted = state.selectedOption === 'Ghosted';
+  const link = document.getElementById('trackingLink').value.trim();
+
+  if (!isGhosted) {
+    if (!link) { showToast('Activity tracking link is required ⚠️'); return; }
+    if (!link.startsWith('http')) { showToast('Enter a valid URL starting with https://'); return; }
+  }
+
+  const notes = document.getElementById('entryNotes').value.trim();
+  const today = dateStr(new Date());
+  const entries = await storageGetParsed('entries', []);
+
+  // Check same-day higher score rule
+  const todayEntries = entries.filter(e => e.member === state.currentUser && e.date === today);
+
+  const newEntry = {
+    id: Date.now().toString(),
+    member: state.currentUser,
+    team: state.currentTeam,
+    date: today,
+    week: getWeekLabel(new Date()),
+    activity: state.selectedActivity,
+    option: state.selectedOption,
+    pts: state.selectedOptionPts,
+    trackingLink: isGhosted ? "#ghosted" : link,
+    notes: notes,
+    timestamp: new Date().toISOString(),
+    counted: true,
+  };
+
+  entries.push(newEntry);
+
+  // Recalculate counted for today — only highest score counts
+  const allToday = entries.filter(e => e.member === state.currentUser && e.date === today);
+  const maxPts = Math.max(...allToday.map(e => e.pts));
+  allToday.forEach(e => { e.counted = (e.pts === maxPts); });
+
+  await storageSet('entries', entries);
+  showToast(`✅ Saved! ${state.selectedOptionPts} pts`);
+
+  // Reset UI
+  state.selectedActivity = null;
+  state.selectedOption = null;
+  state.selectedOptionPts = 0;
+  document.querySelectorAll('.activity-btn').forEach(b => b.classList.remove('selected'));
+  document.querySelectorAll('.options-container').forEach(o => o.classList.remove('visible'));
+  document.getElementById('pointsFlash').classList.remove('visible');
+  document.getElementById('entryForm').classList.add('hidden');
+  document.getElementById('trackingLink').value = '';
+  document.getElementById('entryNotes').value = '';
+
+  await renderTodayLogs();
+  await updateWeekStats();
+  await renderStreak();
+}
+
+async function renderTodayLogs() {
+  const today = dateStr(new Date());
+  const entries = await storageGetParsed('entries', []);
+  const todayEntries = entries.filter(e => e.member === state.currentUser && e.date === today);
+  const container = document.getElementById('todayLogs');
+
+  document.getElementById('todayLoggedAlert').classList.toggle('hidden', todayEntries.length === 0);
+
+  if (!todayEntries.length) {
+    container.innerHTML = `<div style="text-align:center;padding:24px;color:var(--wolf-gray);font-family:var(--font-heading);">No entries today yet. Get moving! 🐺</div>`;
+    return;
+  }
+
+  container.innerHTML = todayEntries.map(e => `
+    <div class="log-entry fade-in">
+      <div class="log-dot ${e.activity}"></div>
+      <div class="log-info">
+        <div class="log-type" style="color:${actColor(e.activity)}">${e.activity.toUpperCase()} — ${e.option}</div>
+        <div class="log-detail">${e.counted ? '✅ Counted' : '⚠️ Not counted (lower score)'} · ${e.pts} pts</div>
+        <a class="log-link" href="${e.trackingLink}" target="_blank">🔗 View Activity</a>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
+        <div class="log-pts">${e.pts}</div>
+        <button onclick="deleteMyEntry('${e.id}')" style="background:rgba(230,57,70,0.15);border:1px solid rgba(230,57,70,0.3);color:var(--wolf-red);border-radius:6px;padding:4px 8px;font-size:11px;cursor:pointer;font-family:var(--font-heading);">🗑️</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function updateWeekStats() {
+  const entries = await storageGetParsed('entries', []);
+  const week = getWeekLabel(new Date());
+  const myEntries = entries.filter(e => e.member === state.currentUser && e.week === week && e.counted);
+
+  const runPts = myEntries.filter(e => e.activity === 'run').reduce((s, e) => s + e.pts, 0);
+  const strPts = myEntries.filter(e => e.activity === 'strength').reduce((s, e) => s + e.pts, 0);
+  const total = myEntries.reduce((s, e) => s + e.pts, 0);
+
+  document.getElementById('statRun').textContent = runPts;
+  document.getElementById('statStr').textContent = strPts;
+  document.getElementById('statTotal').textContent = total;
+}
+
+async function renderStreak() {
+  const entries = await storageGetParsed('entries', []);
+  const myEntries = entries.filter(e => e.member === state.currentUser && e.counted);
+  const streak = calcStreak(myEntries);
+  const el = document.getElementById('streakDisplay');
+  if (streak >= 6) {
+    el.innerHTML = `<div class="streak-badge streak-6">🔥 ${streak} DAY STREAK</div>`;
+  } else if (streak >= 3) {
+    el.innerHTML = `<div class="streak-badge streak-3">🔥 ${streak}d</div>`;
+  } else {
+    el.innerHTML = '';
+  }
+}
+
+function calcStreak(entries) {
+  if (!entries.length) return 0;
+  const dates = [...new Set(entries.map(e => e.date))].sort().reverse();
+  let streak = 0;
+  let cur = new Date();
+  cur.setHours(0,0,0,0);
+  for (const d of dates) {
+    const dd = new Date(d);
+    dd.setHours(0,0,0,0);
+    const diff = Math.round((cur - dd) / 86400000);
+    if (diff <= 1) { streak++; cur = dd; }
+    else break;
+  }
+  return streak;
+}
+
+// ===================== MY WEEK TAB =====================
+async function renderMyWeek() {
+  const entries = await storageGetParsed('entries', []);
+  const week = getWeekLabel(new Date());
+  const myEntries = entries.filter(e => e.member === state.currentUser && e.week === week && e.counted);
+
+  document.getElementById('myWeekRange').textContent = week;
+
+  const runPts = myEntries.filter(e=>e.activity==='run').reduce((s,e)=>s+e.pts,0);
+  const strPts = myEntries.filter(e=>e.activity==='strength').reduce((s,e)=>s+e.pts,0);
+  const cultPts = myEntries.filter(e=>e.activity==='culture').reduce((s,e)=>s+e.pts,0);
+  const total = myEntries.reduce((s,e)=>s+e.pts,0);
+
+  document.getElementById('mwRun').textContent = runPts;
+  document.getElementById('mwStr').textContent = strPts;
+  document.getElementById('mwCult').textContent = cultPts;
+  document.getElementById('mwTotal').textContent = total;
+
+  // Heatmap
+  const heatmap = document.getElementById('weekHeatmap');
+  const dayLabels = ['M','T','W','T','F','S','S'];
+  const weekStart = getWeekStart(new Date());
+  heatmap.innerHTML = dayLabels.map(d => `<div class="heatmap-day day-header">${d}</div>`).join('');
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(weekStart);
+    d.setDate(d.getDate() + i);
+    const ds = dateStr(d);
+    const isToday = ds === dateStr(new Date());
+    const dayEntries = myEntries.filter(e => e.date === ds);
+    const pts = dayEntries.reduce((s,e)=>s+e.pts,0);
+    const level = pts >= 10 ? 'high-activity' : pts > 0 ? 'has-activity' : '';
+    heatmap.innerHTML += `<div class="heatmap-day ${level} ${isToday?'today':''}" title="${d.toLocaleDateString('en',{weekday:'short'})} — ${pts}pts">${d.getDate()}</div>`;
+  }
+
+  // Entries list
+  const list = document.getElementById('myEntriesList');
+  const allMyWeek = entries.filter(e => e.member === state.currentUser && e.week === week).sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
+  if (!allMyWeek.length) {
+    list.innerHTML = `<div style="text-align:center;padding:24px;color:var(--wolf-gray);font-family:var(--font-heading);">No entries this week yet!</div>`;
+    return;
+  }
+  list.innerHTML = allMyWeek.map(e => `
+    <div class="log-entry fade-in">
+      <div class="log-dot ${e.activity}"></div>
+      <div class="log-info">
+        <div class="log-type" style="color:${actColor(e.activity)}">${e.activity.toUpperCase()} — ${e.option}</div>
+        <div class="log-detail">${formatDate(new Date(e.date))} · ${e.counted ? '✅ Counted' : '⚠️ Lower score — not counted'}</div>
+        <a class="log-link" href="${e.trackingLink}" target="_blank">🔗 Activity Link</a>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
+        <div class="log-pts">${e.pts}</div>
+        ${e.counted && isCurrentWeek(e.date) ? `<button class="btn btn-ghost btn-sm" onclick="deleteMyEntry('${e.id}')" style="font-size:11px;padding:4px 8px;">🗑️</button>` : ''}
+      </div>
+    </div>
+  `).join('');
+}
+
+async function deleteMyEntry(id) {
+  const entries = await storageGetParsed('entries', []);
+  const idx = entries.findIndex(e => e.id === id && e.member === state.currentUser);
+  if (idx === -1) return;
+  const e = entries[idx];
+  if (!isCurrentWeek(e.date)) { showToast("Can't edit past weeks"); return; }
+  entries.splice(idx, 1);
+  await storageSet('entries', entries);
+  showToast('Entry deleted');
+  await renderMyWeek();
+  await updateWeekStats();
+}
+
+function isCurrentWeek(dateString) {
+  return getWeekLabel(new Date(dateString)) === getWeekLabel(new Date());
+}
+
+// ===================== LEADERBOARD =====================
+async function renderLeaderboard() {
+  const today = new Date();
+  const isSunday = today.getDay() === 0;
+
+  if (!state.isCapt && !isSunday) {
+    document.getElementById('sundayLock').classList.remove('hidden');
+    document.getElementById('leaderboardContent').classList.add('hidden');
+    return;
+  }
+
+  document.getElementById('sundayLock').classList.add('hidden');
+  document.getElementById('leaderboardContent').classList.remove('hidden');
+
+  const entries = await storageGetParsed('entries', []);
+  const members = await storageGetParsed('members', DEFAULT_MEMBERS);
+  const week = getWeekLabel(new Date());
+
+  // Calculate scores
+  const allMembers = [...(members.Ram||[]),...(members.Mano||[])];
+  const scores = allMembers.map(m => {
+    const team = members.Ram?.find(x=>x.name===m.name) ? 'Ram' : 'Mano';
+    const myE = entries.filter(e => e.member === m.name && e.week === week && e.counted);
+    return { name: m.name, team, pts: myE.reduce((s,e)=>s+e.pts,0) };
+  }).sort((a,b) => b.pts - a.pts);
+
+  // Team totals
+  const ramPts = scores.filter(s=>s.team==='Ram').reduce((t,s)=>t+s.pts,0);
+  const manoPts = scores.filter(s=>s.team==='Mano').reduce((t,s)=>t+s.pts,0);
+  const total = ramPts + manoPts || 1;
+
+  document.getElementById('vsBarRam').style.width = (ramPts/total*100)+'%';
+  document.getElementById('vsBarMano').style.width = (manoPts/total*100)+'%';
+  document.getElementById('vsScoreRam').textContent = ramPts;
+  document.getElementById('vsScoreMano').textContent = manoPts;
+
+  // Filter by team
+  const myTeamScores = state.lbTab === 'team' ? scores.filter(s=>s.team===state.currentTeam) : scores;
+  document.getElementById('lbTeamLabel').textContent = state.lbTab === 'team' ? `Team ${state.currentTeam} Rankings` : 'All Rankings';
+
+  const rankColors = ['gold','silver','bronze'];
+  document.getElementById('lbList').innerHTML = myTeamScores.map((s,i) => `
+    <div class="lb-row fade-in">
+      <div class="lb-rank ${rankColors[i]||''}">${i===0?'🥇':i===1?'🥈':i===2?'🥉':i+1}</div>
+      <div class="lb-avatar">${s.name.charAt(0)}</div>
+      <div class="lb-name">
+        ${s.name}
+        <span class="lb-team-tag">Team ${s.team}</span>
+      </div>
+      <div class="lb-pts">${s.pts}</div>
+    </div>
+  `).join('');
+}
+
+function switchLBTab(tab) {
+  state.lbTab = tab;
+  document.getElementById('lbTab-team').classList.toggle('active', tab==='team');
+  document.getElementById('lbTab-all').classList.toggle('active', tab==='all');
+  document.getElementById('lb-team').classList.toggle('hidden', tab==='all');
+  document.getElementById('lb-teamvsteam').classList.toggle('hidden', tab!=='all');
+  renderLeaderboard();
+}
+
+// ===================== TAB SWITCHING =====================
+function switchTab(tab) {
+  ['log','myweek','leaderboard'].forEach(t => {
+    document.getElementById('tab-'+t).classList.toggle('hidden', t!==tab);
+    document.getElementById('nav-'+t).classList.toggle('active', t===tab);
+  });
+  if (tab === 'myweek') renderMyWeek();
+  if (tab === 'leaderboard') renderLeaderboard();
+}
+
+// ===================== LEGEND MODAL =====================
+async function showLegend(cat) {
+  const legends = await storageGetParsed('legends', DEFAULT_LEGENDS);
+  const catNames = { run:'🏃 RUN', strength:'💪 STRENGTH', culture:'🤝 CULTURE', crosstraining:'🚴 CROSS TRAINING' };
+  document.getElementById('legendModalTitle').textContent = catNames[cat] || cat.toUpperCase();
+  document.getElementById('legendModalSub').textContent = 'Points for each option';
+  document.getElementById('legendModalBody').innerHTML = (legends[cat]||[]).map(item => `
+    <tr>
+      <td>${item.name}</td>
+      <td><span class="pts-badge">${item.pts} pts</span></td>
+    </tr>
+  `).join('');
+  openModal('legendModal');
+}
+
+// ===================== CAPTAIN APP =====================
+async function launchCaptainApp() {
+  showScreen('captain-app');
+  document.getElementById('captainAvatar').textContent = state.currentCapt.charAt(0);
+  document.getElementById('captainName').textContent = `Welcome, Captain ${state.currentCapt}`;
+
+  // Add "My Log" button to captain nav if not already there
+  if (!document.getElementById('cnav-mylog')) {
+    const nav = document.querySelector('#captain-app .bottom-nav');
+    const btn = document.createElement('button');
+    btn.className = 'nav-item';
+    btn.id = 'cnav-mylog';
+    btn.innerHTML = '<span class="nav-icon">➕</span>My Log';
+    btn.onclick = () => launchCaptainWithLog();
+    nav.insertBefore(btn, nav.firstChild);
+  }
+
+  await renderCaptainDashboard();
+  await populateCaptainSelects();
+  switchCTab('dashboard');
+}
+
+async function renderCaptainDashboard() {
+  const entries = await storageGetParsed('entries', []);
+  const members = await storageGetParsed('members', DEFAULT_MEMBERS);
+  const week = getWeekLabel(new Date());
+
+  // Top 5 performers this week
+  const allMembers2 = [...(members.Ram||[]),...(members.Mano||[])];
+  const weekScores = allMembers2.map(m => {
+    const team = (members.Ram||[]).find(x=>x.name===m.name) ? 'Ram' : 'Mano';
+    const pts = entries.filter(e=>e.member===m.name && e.week===week && e.counted).reduce((s,e)=>s+e.pts,0);
+    const streak = calcStreak(entries.filter(e=>e.member===m.name && e.counted));
+    const activeDays = new Set(entries.filter(e=>e.member===m.name && e.week===week && e.counted).map(e=>e.date)).size;
+    return { name:m.name, team, pts, streak, activeDays };
+  }).sort((a,b)=>b.pts-a.pts);
+
+  const top5 = weekScores.slice(0,5);
+  const rankEmoji = ['🥇','🥈','🥉','4️⃣','5️⃣'];
+  const alertsList = document.getElementById('alertsList');
+  alertsList.innerHTML = top5.length ? top5.map((s,i) => `
+    <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--wolf-border);">
+      <span style="font-size:18px;">${rankEmoji[i]}</span>
+      <div style="flex:1;">
+        <div style="font-family:var(--font-heading);font-size:15px;font-weight:700;">${s.name} <span style="font-size:11px;color:var(--wolf-gray);">Team ${s.team}</span></div>
+        <div style="font-size:11px;color:var(--wolf-gray);">${s.activeDays} active days ${s.streak>=3?'· 🔥'+s.streak+' streak':''}</div>
+      </div>
+      <span style="font-family:var(--font-display);font-size:22px;color:var(--wolf-gold);">${s.pts}</span>
+    </div>
+  `).join('') : '<div style="color:var(--wolf-gray);font-family:var(--font-heading);font-size:13px;">No entries this week yet</div>';
+
+  // Team scores
+  const allM = [...(members.Ram||[]),...(members.Mano||[])];
+  const ramPts = entries.filter(e => (members.Ram||[]).find(m=>m.name===e.member) && e.week===week && e.counted).reduce((s,e)=>s+e.pts,0);
+  const manoPts = entries.filter(e => (members.Mano||[]).find(m=>m.name===e.member) && e.week===week && e.counted).reduce((s,e)=>s+e.pts,0);
+  const total = ramPts + manoPts || 1;
+
+  document.getElementById('cvsBarRam').style.width = (ramPts/total*100)+'%';
+  document.getElementById('cvsBarMano').style.width = (manoPts/total*100)+'%';
+  document.getElementById('cvsScoreRam').textContent = ramPts;
+  document.getElementById('cvsScoreMano').textContent = manoPts;
+
+  // Full leaderboard
+  const scores = allM.map(m => {
+    const team = (members.Ram||[]).find(x=>x.name===m.name) ? 'Ram' : 'Mano';
+    const myE = entries.filter(e => e.member === m.name && e.week === week && e.counted);
+    const streak = calcStreak(entries.filter(e=>e.member===m.name && e.counted));
+    return { name: m.name, team, pts: myE.reduce((s,e)=>s+e.pts,0), streak };
+  }).sort((a,b) => b.pts - a.pts);
+
+  const rankColors = ['gold','silver','bronze'];
+  document.getElementById('captainLBList').innerHTML = scores.map((s,i) => `
+    <div class="lb-row">
+      <div class="lb-rank ${rankColors[i]||''}">${i===0?'🥇':i===1?'🥈':i===2?'🥉':i+1}</div>
+      <div class="lb-avatar">${s.name.charAt(0)}</div>
+      <div class="lb-name">
+        ${s.name}
+        <span class="lb-team-tag">Team ${s.team} ${s.streak>=3?'🔥'+s.streak:''}
+        </span>
+      </div>
+      <div class="lb-pts">${s.pts}</div>
+    </div>
+  `).join('');
+}
+
+async function renderCaptainLogs() {
+  const entries = await storageGetParsed('entries', []);
+  const filter = document.getElementById('logFilterMember').value;
+  const filtered = filter ? entries.filter(e=>e.member===filter) : entries;
+  const sorted = [...filtered].sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+  document.getElementById('captainLogsList').innerHTML = sorted.length ? sorted.map(e => `
+    <div class="log-entry fade-in">
+      <div class="log-dot ${e.activity}"></div>
+      <div class="log-info">
+        <div class="log-type" style="color:${actColor(e.activity)}">${e.member} — ${e.activity.toUpperCase()}</div>
+        <div class="log-detail">${e.option} · ${formatDate(new Date(e.date))} · ${e.counted?'✅':'⚠️'}</div>
+        ${e.trackingLink && e.trackingLink !== '#ghosted' && e.trackingLink !== '#preloaded' ? `<a class="log-link" href="${e.trackingLink}" target="_blank">🔗 Activity Link</a>` : ''}
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
+        <div class="log-pts">${e.pts}</div>
+        <div style="display:flex;gap:6px;align-items:center;">
+          ${e.notes ? `<button onclick="showNoteModal('${e.id}')" title="View note" style="background:rgba(0,180,216,0.15);border:1px solid rgba(0,180,216,0.4);color:var(--wolf-cyan);border-radius:6px;padding:4px 8px;font-size:14px;cursor:pointer;">📝</button>` : ''}
+          <button onclick="openEditEntry('${e.id}')" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:var(--wolf-gray);border-radius:6px;padding:4px 8px;font-size:11px;cursor:pointer;font-family:var(--font-heading);">✏️</button>
+        </div>
+      </div>
+    </div>
+  `).join('') : `<div style="text-align:center;padding:24px;color:var(--wolf-gray);font-family:var(--font-heading);">No entries found</div>`;
+}
+
+async function showNoteModal(id) {
+  const entries = await storageGetParsed('entries', []);
+  const e = entries.find(x => x.id === id);
+  if (!e) return;
+  state.editingEntryId = id;
+  document.getElementById('editEntryInfo').textContent = `${e.member} — ${e.activity} — ${formatDate(new Date(e.date))}`;
+  document.getElementById('editEntryNotes').value = e.notes || '';
+  openModal('editEntryModal');
+}
+
+function toggleLinkField(option) {
+  const isGhosted = option === 'Ghosted';
+  const linkGroup = document.getElementById('trackingLinkGroup');
+  if (linkGroup) {
+    linkGroup.style.opacity = isGhosted ? '0.4' : '1';
+    linkGroup.style.pointerEvents = isGhosted ? 'none' : 'auto';
+    document.getElementById('trackingLink').placeholder = isGhosted ? 'Not required for ghosted ✓' : 'https://strava.com/activities/...';
+  }
+}
+
+async function openEditEntry(id) {
+  const entries = await storageGetParsed('entries', []);
+  const e = entries.find(x => x.id === id);
+  if (!e) return;
+  state.editingEntryId = id;
+  document.getElementById('editEntryInfo').textContent = `${e.member} — ${e.activity} — ${formatDate(new Date(e.date))}`;
+  document.getElementById('editEntryNotes').value = e.notes || '';
+  openModal('editEntryModal');
+}
+
+async function saveEditEntry() {
+  const entries = await storageGetParsed('entries', []);
+  const idx = entries.findIndex(e => e.id === state.editingEntryId);
+  if (idx === -1) return;
+  entries[idx].notes = document.getElementById('editEntryNotes').value;
+  await storageSet('entries', entries);
+  closeModal('editEntryModal');
+  showToast('Entry updated ✓');
+  await renderCaptainLogs();
+}
+
+async function deleteEntry() {
+  if (!confirm('Delete this entry?')) return;
+  const entries = await storageGetParsed('entries', []);
+  const idx = entries.findIndex(e => e.id === state.editingEntryId);
+  if (idx === -1) return;
+  entries.splice(idx, 1);
+  await storageSet('entries', entries);
+  closeModal('editEntryModal');
+  showToast('Entry deleted');
+  await renderCaptainLogs();
+  await renderCaptainDashboard();
+}
+
+// MEMBER MANAGEMENT
+function selectNewMemberTeam(team) {
+  state.newMemberTeam = team;
+  document.getElementById('nmTeam-Ram').classList.toggle('selected', team==='Ram');
+  document.getElementById('nmTeam-Mano').classList.toggle('selected', team==='Mano');
+}
+
+async function addMember() {
+  const name = document.getElementById('newMemberName').value.trim();
+  if (!name) { showToast('Enter a name'); return; }
+  if (!state.newMemberTeam) { showToast('Select a team'); return; }
+  const isCapt = document.getElementById('newMemberIsCaptain').checked;
+
+  const members = await storageGetParsed('members', DEFAULT_MEMBERS);
+  if (!members[state.newMemberTeam]) members[state.newMemberTeam] = [];
+  if (members[state.newMemberTeam].find(m=>m.name===name)) { showToast('Member already exists'); return; }
+
+  members[state.newMemberTeam].push({ name, isCapt });
+  await storageSet('members', members);
+  document.getElementById('newMemberName').value = '';
+  showToast(`${name} added to Team ${state.newMemberTeam} ✓`);
+  await renderMemberLists();
+  await populateCaptainSelects();
+}
+
+async function renderMemberLists() {
+  const members = await storageGetParsed('members', DEFAULT_MEMBERS);
+  ['Ram','Mano'].forEach(team => {
+    document.getElementById('memberList'+team).innerHTML = (members[team]||[]).map(m => `
+      <div class="member-row">
+        <div class="user-avatar" style="width:32px;height:32px;font-size:13px;">${m.name.charAt(0)}</div>
+        <div class="member-row-info">
+          <div class="member-row-name">${m.name} ${m.isCapt?'<span class="captain-badge" style="font-size:10px;">⚡ CAPTAIN</span>':''}</div>
+          <div class="member-row-team">Team ${team}</div>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="removeMember('${m.name}','${team}')" style="font-size:11px;">✕</button>
+      </div>
+    `).join('');
+  });
+}
+
+async function removeMember(name, team) {
+  if (!confirm(`Remove ${name} from Team ${team}?`)) return;
+  const members = await storageGetParsed('members', DEFAULT_MEMBERS);
+  members[team] = (members[team]||[]).filter(m=>m.name!==name);
+  await storageSet('members', members);
+  showToast(`${name} removed`);
+  await renderMemberLists();
+}
+
+// LEGENDS
+async function renderLegendsList() {
+  const legends = await storageGetParsed('legends', DEFAULT_LEGENDS);
+  const catNames = { run:'🏃 RUN', strength:'💪 STRENGTH', culture:'🤝 CULTURE', crosstraining:'🚴 CROSS TRAINING' };
+  const container = document.getElementById('legendsList');
+  container.innerHTML = '';
+
+  Object.entries(legends).forEach(([cat, items]) => {
+    const section = document.createElement('div');
+    section.className = 'card';
+    section.style.marginBottom = '12px';
+    section.innerHTML = `
+      <div style="font-family:var(--font-heading);font-size:14px;font-weight:700;color:var(--wolf-gold);letter-spacing:1px;text-transform:uppercase;margin-bottom:12px;">${catNames[cat]||cat.toUpperCase()}</div>
+      ${items.map((item,i) => `
+        <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--wolf-border);">
+          <div style="flex:1;font-size:14px;">${item.name}</div>
+          <input type="number" value="${item.pts}" min="0" max="50" style="width:60px;padding:4px 8px;background:rgba(255,255,255,0.05);border:1px solid var(--wolf-border);border-radius:6px;color:var(--wolf-light);font-family:var(--font-heading);font-size:14px;text-align:center;" onchange="updateLegendPts('${cat}',${i},this.value)">
+          <span style="font-size:11px;color:var(--wolf-gray);">pts</span>
+        </div>
+      `).join('')}
+    `;
+    container.appendChild(section);
+  });
+}
+
+async function updateLegendPts(cat, idx, newPts) {
+  const legends = await storageGetParsed('legends', DEFAULT_LEGENDS);
+  const oldPts = legends[cat][idx].pts;
+  legends[cat][idx].pts = parseInt(newPts);
+  // Store change with effective date (tomorrow)
+  const changes = await storageGetParsed('legendChanges', []);
+  changes.push({ cat, idx, oldPts, newPts: parseInt(newPts), effectiveFrom: dateStr(tomorrow()) });
+  await storageSet('legendChanges', changes);
+  await storageSet('legends', legends);
+  showToast('Points updated — effective tomorrow ✓');
+}
+
+async function addLegend() {
+  const cat = document.getElementById('newLegendCat').value;
+  const name = document.getElementById('newLegendName').value.trim();
+  const pts = parseInt(document.getElementById('newLegendPts').value);
+  if (!name || isNaN(pts)) { showToast('Fill name and points'); return; }
+
+  const legends = await storageGetParsed('legends', DEFAULT_LEGENDS);
+  let targetCat = cat;
+
+  if (cat === 'new') {
+    const newCat = document.getElementById('newCatName').value.trim();
+    if (!newCat) { showToast('Enter category name'); return; }
+    targetCat = newCat.toLowerCase().replace(/\s+/g,'');
+    if (!legends[targetCat]) legends[targetCat] = [];
+  }
+
+  if (!legends[targetCat]) legends[targetCat] = [];
+  legends[targetCat].push({ name, pts });
+  await storageSet('legends', legends);
+
+  document.getElementById('newLegendName').value = '';
+  document.getElementById('newLegendPts').value = '';
+  showToast(`${name} added ✓`);
+  await renderLegendsList();
+  await renderActivityButtons();
+}
+
+async function awardFreePass() {
+  const memberName = document.getElementById('freePassMember').value;
+  if (!memberName) { showToast('Select a member'); return; }
+
+  // Check if already awarded this month
+  const passes = await storageGetParsed('freePasses', []);
+  const monthKey = new Date().toISOString().slice(0,7);
+  const alreadyAwarded = passes.find(p => p.member === memberName && p.month === monthKey);
+  if (alreadyAwarded) { showToast(`${memberName} already has a free pass this month`); return; }
+
+  const entries = await storageGetParsed('entries', []);
+  entries.push({
+    id: Date.now().toString(),
+    member: memberName,
+    team: state.currentTeam,
+    date: dateStr(new Date()),
+    week: getWeekLabel(new Date()),
+    activity: 'freepass',
+    option: '🎟️ Free Pass',
+    pts: 10,
+    trackingLink: '#',
+    notes: `Free pass awarded by Captain ${state.currentCapt}`,
+    timestamp: new Date().toISOString(),
+    counted: true,
+  });
+
+  passes.push({ member: memberName, month: monthKey, awardedBy: state.currentCapt });
+  await storageSet('entries', entries);
+  await storageSet('freePasses', passes);
+  showToast(`🎟️ Free pass awarded to ${memberName}! (10 pts)`);
+}
+
+// CAPTAIN TAB SWITCHING
+async function switchCTab(tab) {
+  ['dashboard','logs','members','legends'].forEach(t => {
+    document.getElementById('ctab-'+t).classList.toggle('hidden', t!==tab);
+    document.getElementById('cnav-'+t).classList.toggle('active', t===tab);
+  });
+  if (tab === 'logs') { await renderCaptainLogs(); }
+  if (tab === 'members') { await renderMemberLists(); }
+  if (tab === 'legends') { await renderLegendsList(); }
+}
+
+// POPULATE SELECTS
+async function populateCaptainSelects() {
+  const members = await storageGetParsed('members', DEFAULT_MEMBERS);
+  const allM = [...(members.Ram||[]),...(members.Mano||[])];
+
+  const fpSel = document.getElementById('freePassMember');
+  fpSel.innerHTML = '<option value="">Select Member</option>' + allM.map(m=>`<option value="${m.name}">${m.name}</option>`).join('');
+
+  const logFilter = document.getElementById('logFilterMember');
+  logFilter.innerHTML = '<option value="">All Members</option>' + allM.map(m=>`<option value="${m.name}">${m.name}</option>`).join('');
+}
+
+// WEEKLY RECAP WITH AI QUOTE
+async function generateRecap() {
+  const entries = await storageGetParsed('entries', []);
+  const members = await storageGetParsed('members', DEFAULT_MEMBERS);
+  const week = getWeekLabel(new Date());
+  const weekEntries = entries.filter(e => e.week === week && e.counted);
+
+  const allM = [...(members.Ram||[]),...(members.Mano||[])];
+  const scores = allM.map(m => {
+    const team = (members.Ram||[]).find(x=>x.name===m.name) ? 'Ram' : 'Mano';
+    const pts = weekEntries.filter(e=>e.member===m.name).reduce((s,e)=>s+e.pts,0);
+    return { name:m.name, team, pts };
+  }).sort((a,b)=>b.pts-a.pts);
+
+  const top = scores[0];
+  const ramPts = scores.filter(s=>s.team==='Ram').reduce((t,s)=>t+s.pts,0);
+  const manoPts = scores.filter(s=>s.team==='Mano').reduce((t,s)=>t+s.pts,0);
+  const streaks = allM.map(m => ({ name:m.name, streak:calcStreak(entries.filter(e=>e.member===m.name&&e.counted)) })).filter(s=>s.streak>=3).sort((a,b)=>b.streak-a.streak);
+
+  const recap = `🐺 *WOLFPACK WEEKLY RECAP — ${week}*
+
+🏆 Top Scorer: *${top?.name||'—'}* (${top?.pts||0} pts)
+
+⚔️ Team Battle:
+• Team Ram: *${ramPts} pts*
+• Team Mano: *${manoPts} pts*
+${ramPts > manoPts ? '🔴 Team Ram leads this week!' : manoPts > ramPts ? '🔵 Team Mano leads this week!' : '⚖️ It\'s a tie!'}
+
+🔥 Streaks:
+${streaks.length ? streaks.slice(0,3).map(s=>`• ${s.name}: ${s.streak}-day streak`).join('\n') : '• Keep pushing for streaks next week!'}
+
+📊 Weekly Totals:
+${scores.slice(0,5).map((s,i)=>`${i+1}. ${s.name} — ${s.pts} pts`).join('\n')}
+
+_Points are for showing up smart, not showing off tired_ 🐺`;
+
+  document.getElementById('recapContent').innerHTML = `<pre style="white-space:pre-wrap;font-family:var(--font-body);font-size:13px;line-height:1.6;color:var(--wolf-light);">${recap}</pre>`;
+
+  // AI Quote
+  document.getElementById('recapQuote').textContent = 'Generating AI quote...';
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 100,
+        messages: [{
+          role: 'user',
+          content: `Generate one short, powerful, original motivational quote (max 20 words) for a running and fitness team called Wolfpack starting their next training week. Make it about consistency, showing up, or pack mentality. Just the quote, no attribution.`
+        }]
+      })
+    });
+    const data = await response.json();
+    const quote = data.content?.[0]?.text || 'The pack runs together. Show up for yourself, show up for your pack. 🐺';
+    document.getElementById('recapQuote').textContent = `"${quote}"`;
+  } catch(e) {
+    document.getElementById('recapQuote').textContent = '"The pack runs together. Show up for yourself, show up for your pack. 🐺"';
+  }
+}
+
+function copyRecap() {
+  const text = document.getElementById('recapContent').querySelector('pre')?.textContent || '';
+  const quote = document.getElementById('recapQuote').textContent;
+  navigator.clipboard.writeText(text + '\n\n💬 Next Week Quote:\n' + quote).then(() => showToast('Copied for WhatsApp! 📋'));
+}
+
+// EXPORT
+async function exportToExcel() {
+  const entries = await storageGetParsed('entries', []);
+  const week = getWeekLabel(new Date());
+  const weekEntries = entries.filter(e => e.week === week);
+
+  let csv = 'Member,Team,Date,Activity,Option,Points,Counted,Tracking Link,Notes\n';
+  weekEntries.forEach(e => {
+    csv += `"${e.member}","${e.team}","${e.date}","${e.activity}","${e.option}",${e.pts},"${e.counted?'Yes':'No'}","${e.trackingLink}","${(e.notes||'').replace(/"/g,"'")}"\n`;
+  });
+
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `Wolfpack_${week.replace(/\s/g,'_')}.csv`;
+  a.click();
+  showToast('Exported! Upload to Google Drive 📥');
+}
+
+// ===================== UTILS =====================
+function actColor(a) {
+  return { run:'var(--wolf-red)', strength:'var(--wolf-gold)', culture:'var(--wolf-cyan)', crosstraining:'var(--wolf-green)', freepass:'#c77dff' }[a] || 'var(--wolf-light)';
+}
+
+function dateStr(d) {
+  return d.toISOString().slice(0,10);
+}
+
+function tomorrow() {
+  const d = new Date(); d.setDate(d.getDate()+1); return d;
+}
+
+function getWeekStart(d) {
+  const day = d.getDay();
+  const diff = (day === 0 ? -6 : 1) - day;
+  const monday = new Date(d);
+  monday.setDate(d.getDate() + diff);
+  monday.setHours(0,0,0,0);
+  return monday;
+}
+
+function getWeekLabel(d) {
+  const mon = getWeekStart(d);
+  const sun = new Date(mon); sun.setDate(mon.getDate()+6);
+  const fmt = dt => dt.toLocaleDateString('en', { month:'short', day:'numeric' });
+  return `${fmt(mon)} – ${fmt(sun)}`;
+}
+
+function formatDate(d) {
+  return d.toLocaleDateString('en', { weekday:'short', month:'short', day:'numeric' });
+}
+
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// New cat name toggle
+document.getElementById('newLegendCat').addEventListener('change', function() {
+  document.getElementById('newCatNameGroup').style.display = this.value === 'new' ? 'block' : 'none';
+});
+
+// Recap modal open
+const origOpen = openModal;
+window.openModal = function(id) {
+  origOpen(id);
+  if (id === 'recapModal') generateRecap();
+};
+
+// ===================== START =====================
+init();
+</script>
+</body>
+</html>

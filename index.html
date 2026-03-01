@@ -1723,7 +1723,13 @@ async function storageSet(key, val) { return lsSet(key, val); }
 async function storageGetParsed(key, def) { return lsGet(key, def); }
 
 // ===================== PRELOADED WEEK 1 DATA =====================
-const WEEK1 = 'Feb 23 – Mar 1';
+// Computed to exactly match getWeekLabel output on every device
+const WEEK1 = (() => {
+  const mon = new Date(2026, 1, 23); // Feb 23 2026 local
+  const sun = new Date(2026, 2, 1);  // Mar 1 2026 local
+  const fmt = dt => dt.toLocaleDateString('en', { month:'short', day:'numeric' });
+  return fmt(mon) + ' – ' + fmt(sun);
+})();
 
 const PRELOADED_ENTRIES = [
   // ── TEAM RAM ── (exact from Excel Week 1)
@@ -1892,11 +1898,11 @@ async function init() {
 
   // Load preloaded entries — always replace pre_ entries with latest correct data
   const preloaded = lsGet('preloaded_done', false);
-  if (preloaded !== 'v6') {
+  if (preloaded !== 'v8') {
     const existing = lsGet('entries', []).filter(e => !e.id.startsWith('pre_')); // keep only real user entries
     const merged = [...existing, ...PRELOADED_ENTRIES]; // always use fresh preloaded data
     lsSet('entries', merged);
-    lsSet('preloaded_done', 'v6');
+    lsSet('preloaded_done', 'v8');
     console.log('✅ Preloaded v6 —', merged.length, 'entries');
   }
 
@@ -2825,7 +2831,11 @@ function actColor(a) {
 }
 
 function dateStr(d) {
-  return d.toISOString().slice(0,10);
+  // Local date — avoids UTC offset bug for IST and other timezones
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return y + '-' + m + '-' + day;
 }
 
 function tomorrow() {

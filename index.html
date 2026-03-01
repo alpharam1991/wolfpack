@@ -1696,22 +1696,31 @@ let state = {
   lbTab: 'team',
 };
 
-// Storage helpers — localStorage based (works on GitHub Pages, iOS Safari, Android)
-async function storageGet(key) {
-  try { const v = localStorage.getItem('wolfpack_' + key); return v ? { value: v } : null; } catch(e) { return null; }
-}
-
-async function storageSet(key, val) {
-  try { localStorage.setItem('wolfpack_' + key, JSON.stringify(val)); return true; } catch(e) { return null; }
-}
-
-async function storageGetParsed(key, def) {
+// ===================== STORAGE — localStorage (GitHub Pages safe) =====================
+function lsSet(key, val) {
   try {
-    const v = localStorage.getItem('wolfpack_' + key);
-    if (!v) return def;
-    return JSON.parse(v);
-  } catch(e) { return def; }
+    localStorage.setItem('wp_' + key, JSON.stringify(val));
+    return true;
+  } catch(e) {
+    console.error('Storage write error:', e);
+    return false;
+  }
 }
+
+function lsGet(key, def) {
+  try {
+    const raw = localStorage.getItem('wp_' + key);
+    if (raw === null || raw === undefined) return def;
+    return JSON.parse(raw);
+  } catch(e) {
+    console.error('Storage read error:', e);
+    return def;
+  }
+}
+
+// Keep async wrappers for compatibility
+async function storageSet(key, val) { return lsSet(key, val); }
+async function storageGetParsed(key, def) { return lsGet(key, def); }
 
 // ===================== PRELOADED WEEK 1 DATA =====================
 const WEEK1 = 'Feb 23 – Mar 1';
@@ -1868,26 +1877,27 @@ const PRELOADED_ENTRIES = [
 // ===================== INIT =====================
 async function init() {
   // Initialize defaults if not set
-  const members = await storageGetParsed('members', null);
-  if (!members) await storageSet('members', DEFAULT_MEMBERS);
+  const members = lsGet('members', null);
+  if (!members) lsSet('members', DEFAULT_MEMBERS);
 
-  const legends = await storageGetParsed('legends', null);
-  if (!legends) await storageSet('legends', DEFAULT_LEGENDS);
+  const legends = lsGet('legends', null);
+  if (!legends) lsSet('legends', DEFAULT_LEGENDS);
 
   // Load preloaded entries once
-  const preloaded = await storageGetParsed('preloaded_done', false);
+  const preloaded = lsGet('preloaded_done', false);
   if (!preloaded) {
-    const existing = await storageGetParsed('entries', []);
+    const existing = lsGet('entries', []);
     const merged = [...existing];
     PRELOADED_ENTRIES.forEach(pe => {
       if (!merged.find(e => e.id === pe.id)) merged.push(pe);
     });
-    await storageSet('entries', merged);
-    await storageSet('preloaded_done', true);
+    lsSet('entries', merged);
+    lsSet('preloaded_done', true);
+    console.log('✅ Preloaded', merged.length, 'entries');
   }
 
   // Check saved session
-  const savedUser = await storageGetParsed('session', null);
+  const savedUser = lsGet('session', null);
   if (savedUser && savedUser.name) {
     state.currentUser = savedUser.name;
     state.currentTeam = savedUser.team;
@@ -1916,7 +1926,7 @@ function selectTeam(team) {
 }
 
 async function populateMemberSelect(team) {
-  const members = await storageGetParsed('members', DEFAULT_MEMBERS);
+  const members = lsGet('members', DEFAULT_MEMBERS);
   const sel = document.getElementById('memberSelect');
   sel.innerHTML = '<option value="">— Select your name —</option>';
   (members[team] || []).forEach(m => {
@@ -1932,7 +1942,7 @@ async function onMemberSelect() {
   if (!name) return;
   // Auto-detect team if not selected
   if (!state.currentTeam) {
-    const members = await storageGetParsed('members', DEFAULT_MEMBERS);
+    const members = lsGet('members', DEFAULT_MEMBERS);
     for (const [t, list] of Object.entries(members)) {
       if (list.find(m => m.name === name)) {
         state.currentTeam = t;
@@ -1948,7 +1958,7 @@ async function memberLogin() {
   if (!name) { showToast('Please select your name'); return; }
   if (!state.currentTeam) { showToast('Please select your team'); return; }
 
-  const members = await storageGetParsed('members', DEFAULT_MEMBERS);
+  const members = lsGet('members', DEFAULT_MEMBERS);
   const teamMembers = members[state.currentTeam] || [];
   const member = teamMembers.find(m => m.name === name);
   if (!member) { showToast('Member not found'); return; }
@@ -1956,7 +1966,7 @@ async function memberLogin() {
   state.currentUser = name;
   state.isCapt = member.isCapt || false;
 
-  await storageSet('session', { name, team: state.currentTeam, isCapt: state.isCapt });
+  lsSet('session', { name, team: state.currentTeam, isCapt: state.isCapt });
 
   if (state.isCapt) {
     state.currentCapt = name;
@@ -1978,19 +1988,19 @@ async function captainLogin() {
   state.isCapt = true;
 
   // Find team
-  const members = await storageGetParsed('members', DEFAULT_MEMBERS);
+  const members = lsGet('members', DEFAULT_MEMBERS);
   for (const [t, list] of Object.entries(members)) {
     if (list.find(m => m.name === name)) { state.currentTeam = t; break; }
   }
   if (!state.currentTeam) state.currentTeam = 'Ram';
 
-  await storageSet('session', { name, team: state.currentTeam, isCapt: true });
+  lsSet('session', { name, team: state.currentTeam, isCapt: true });
   // Captains see log screen first
   await launchCaptainWithLog();
 }
 
 function logout() {
-  storageSet('session', null);
+  lsSet('session', null);
   state = { currentUser:null, currentTeam:null, isCapt:false, currentCapt:null, selectedActivity:null, selectedOption:null, selectedOptionPts:0, editingEntryId:null, newMemberTeam:null, lbTab:'team' };
   showScreen('splash');
 }
@@ -2027,7 +2037,7 @@ async function launchCaptainWithLog() {
 }
 
 async function renderActivityButtons() {
-  const legends = await storageGetParsed('legends', DEFAULT_LEGENDS);
+  const legends = lsGet('legends', DEFAULT_LEGENDS);
   ['run','strength','culture','crosstraining'].forEach(cat => {
     const container = document.getElementById('pills-' + cat);
     container.innerHTML = '';
@@ -2090,13 +2100,12 @@ async function saveEntry() {
 
   const notes = document.getElementById('entryNotes').value.trim();
   const today = dateStr(new Date());
-  const entries = await storageGetParsed('entries', []);
 
-  // Check same-day higher score rule
-  const todayEntries = entries.filter(e => e.member === state.currentUser && e.date === today);
+  // Load entries synchronously
+  const entries = lsGet('entries', []);
 
   const newEntry = {
-    id: Date.now().toString(),
+    id: 'e_' + Date.now(),
     member: state.currentUser,
     team: state.currentTeam,
     date: today,
@@ -2104,7 +2113,7 @@ async function saveEntry() {
     activity: state.selectedActivity,
     option: state.selectedOption,
     pts: state.selectedOptionPts,
-    trackingLink: isGhosted ? "#ghosted" : link,
+    trackingLink: isGhosted ? '#ghosted' : link,
     notes: notes,
     timestamp: new Date().toISOString(),
     counted: true,
@@ -2112,12 +2121,27 @@ async function saveEntry() {
 
   entries.push(newEntry);
 
-  // Recalculate counted for today — only highest score counts
+  // Recalculate counted for today — highest score wins
   const allToday = entries.filter(e => e.member === state.currentUser && e.date === today);
   const maxPts = Math.max(...allToday.map(e => e.pts));
   allToday.forEach(e => { e.counted = (e.pts === maxPts); });
 
-  await storageSet('entries', entries);
+  // Save synchronously
+  const saved = lsSet('entries', entries);
+
+  if (!saved) {
+    showToast('❌ Save failed! Check browser storage settings');
+    return;
+  }
+
+  // Verify save worked
+  const verify = lsGet('entries', []);
+  const found = verify.find(e => e.id === newEntry.id);
+  if (!found) {
+    showToast('❌ Entry not saved — storage may be blocked');
+    return;
+  }
+
   showToast(`✅ Saved! ${state.selectedOptionPts} pts`);
 
   // Reset UI
@@ -2138,7 +2162,7 @@ async function saveEntry() {
 
 async function renderTodayLogs() {
   const today = dateStr(new Date());
-  const entries = await storageGetParsed('entries', []);
+  const entries = lsGet('entries', []);
   const todayEntries = entries.filter(e => e.member === state.currentUser && e.date === today);
   const container = document.getElementById('todayLogs');
 
@@ -2166,7 +2190,7 @@ async function renderTodayLogs() {
 }
 
 async function updateWeekStats() {
-  const entries = await storageGetParsed('entries', []);
+  const entries = lsGet('entries', []);
   const week = getWeekLabel(new Date());
   const myEntries = entries.filter(e => e.member === state.currentUser && e.week === week && e.counted);
 
@@ -2180,7 +2204,7 @@ async function updateWeekStats() {
 }
 
 async function renderStreak() {
-  const entries = await storageGetParsed('entries', []);
+  const entries = lsGet('entries', []);
   const myEntries = entries.filter(e => e.member === state.currentUser && e.counted);
   const streak = calcStreak(myEntries);
   const el = document.getElementById('streakDisplay');
@@ -2211,7 +2235,7 @@ function calcStreak(entries) {
 
 // ===================== MY WEEK TAB =====================
 async function renderMyWeek() {
-  const entries = await storageGetParsed('entries', []);
+  const entries = lsGet('entries', []);
   const week = getWeekLabel(new Date());
   const myEntries = entries.filter(e => e.member === state.currentUser && e.week === week && e.counted);
 
@@ -2267,13 +2291,13 @@ async function renderMyWeek() {
 }
 
 async function deleteMyEntry(id) {
-  const entries = await storageGetParsed('entries', []);
+  const entries = lsGet('entries', []);
   const idx = entries.findIndex(e => e.id === id && e.member === state.currentUser);
   if (idx === -1) return;
   const e = entries[idx];
   if (!isCurrentWeek(e.date)) { showToast("Can't edit past weeks"); return; }
   entries.splice(idx, 1);
-  await storageSet('entries', entries);
+  lsSet('entries', entries);
   showToast('Entry deleted');
   await renderMyWeek();
   await updateWeekStats();
@@ -2297,8 +2321,8 @@ async function renderLeaderboard() {
   document.getElementById('sundayLock').classList.add('hidden');
   document.getElementById('leaderboardContent').classList.remove('hidden');
 
-  const entries = await storageGetParsed('entries', []);
-  const members = await storageGetParsed('members', DEFAULT_MEMBERS);
+  const entries = lsGet('entries', []);
+  const members = lsGet('members', DEFAULT_MEMBERS);
   const week = getWeekLabel(new Date());
 
   // Calculate scores
@@ -2358,7 +2382,7 @@ function switchTab(tab) {
 
 // ===================== LEGEND MODAL =====================
 async function showLegend(cat) {
-  const legends = await storageGetParsed('legends', DEFAULT_LEGENDS);
+  const legends = lsGet('legends', DEFAULT_LEGENDS);
   const catNames = { run:'🏃 RUN', strength:'💪 STRENGTH', culture:'🤝 CULTURE', crosstraining:'🚴 CROSS TRAINING' };
   document.getElementById('legendModalTitle').textContent = catNames[cat] || cat.toUpperCase();
   document.getElementById('legendModalSub').textContent = 'Points for each option';
@@ -2394,8 +2418,8 @@ async function launchCaptainApp() {
 }
 
 async function renderCaptainDashboard() {
-  const entries = await storageGetParsed('entries', []);
-  const members = await storageGetParsed('members', DEFAULT_MEMBERS);
+  const entries = lsGet('entries', []);
+  const members = lsGet('members', DEFAULT_MEMBERS);
   const week = getWeekLabel(new Date());
 
   // Top 5 performers this week
@@ -2457,7 +2481,7 @@ async function renderCaptainDashboard() {
 }
 
 async function renderCaptainLogs() {
-  const entries = await storageGetParsed('entries', []);
+  const entries = lsGet('entries', []);
   const filter = document.getElementById('logFilterMember').value;
   const filtered = filter ? entries.filter(e=>e.member===filter) : entries;
   const sorted = [...filtered].sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
@@ -2482,7 +2506,7 @@ async function renderCaptainLogs() {
 }
 
 async function showNoteModal(id) {
-  const entries = await storageGetParsed('entries', []);
+  const entries = lsGet('entries', []);
   const e = entries.find(x => x.id === id);
   if (!e) return;
   state.editingEntryId = id;
@@ -2502,7 +2526,7 @@ function toggleLinkField(option) {
 }
 
 async function openEditEntry(id) {
-  const entries = await storageGetParsed('entries', []);
+  const entries = lsGet('entries', []);
   const e = entries.find(x => x.id === id);
   if (!e) return;
   state.editingEntryId = id;
@@ -2512,11 +2536,11 @@ async function openEditEntry(id) {
 }
 
 async function saveEditEntry() {
-  const entries = await storageGetParsed('entries', []);
+  const entries = lsGet('entries', []);
   const idx = entries.findIndex(e => e.id === state.editingEntryId);
   if (idx === -1) return;
   entries[idx].notes = document.getElementById('editEntryNotes').value;
-  await storageSet('entries', entries);
+  lsSet('entries', entries);
   closeModal('editEntryModal');
   showToast('Entry updated ✓');
   await renderCaptainLogs();
@@ -2524,11 +2548,11 @@ async function saveEditEntry() {
 
 async function deleteEntry() {
   if (!confirm('Delete this entry?')) return;
-  const entries = await storageGetParsed('entries', []);
+  const entries = lsGet('entries', []);
   const idx = entries.findIndex(e => e.id === state.editingEntryId);
   if (idx === -1) return;
   entries.splice(idx, 1);
-  await storageSet('entries', entries);
+  lsSet('entries', entries);
   closeModal('editEntryModal');
   showToast('Entry deleted');
   await renderCaptainLogs();
@@ -2548,12 +2572,12 @@ async function addMember() {
   if (!state.newMemberTeam) { showToast('Select a team'); return; }
   const isCapt = document.getElementById('newMemberIsCaptain').checked;
 
-  const members = await storageGetParsed('members', DEFAULT_MEMBERS);
+  const members = lsGet('members', DEFAULT_MEMBERS);
   if (!members[state.newMemberTeam]) members[state.newMemberTeam] = [];
   if (members[state.newMemberTeam].find(m=>m.name===name)) { showToast('Member already exists'); return; }
 
   members[state.newMemberTeam].push({ name, isCapt });
-  await storageSet('members', members);
+  lsSet('members', members);
   document.getElementById('newMemberName').value = '';
   showToast(`${name} added to Team ${state.newMemberTeam} ✓`);
   await renderMemberLists();
@@ -2561,7 +2585,7 @@ async function addMember() {
 }
 
 async function renderMemberLists() {
-  const members = await storageGetParsed('members', DEFAULT_MEMBERS);
+  const members = lsGet('members', DEFAULT_MEMBERS);
   ['Ram','Mano'].forEach(team => {
     document.getElementById('memberList'+team).innerHTML = (members[team]||[]).map(m => `
       <div class="member-row">
@@ -2578,16 +2602,16 @@ async function renderMemberLists() {
 
 async function removeMember(name, team) {
   if (!confirm(`Remove ${name} from Team ${team}?`)) return;
-  const members = await storageGetParsed('members', DEFAULT_MEMBERS);
+  const members = lsGet('members', DEFAULT_MEMBERS);
   members[team] = (members[team]||[]).filter(m=>m.name!==name);
-  await storageSet('members', members);
+  lsSet('members', members);
   showToast(`${name} removed`);
   await renderMemberLists();
 }
 
 // LEGENDS
 async function renderLegendsList() {
-  const legends = await storageGetParsed('legends', DEFAULT_LEGENDS);
+  const legends = lsGet('legends', DEFAULT_LEGENDS);
   const catNames = { run:'🏃 RUN', strength:'💪 STRENGTH', culture:'🤝 CULTURE', crosstraining:'🚴 CROSS TRAINING' };
   const container = document.getElementById('legendsList');
   container.innerHTML = '';
@@ -2611,14 +2635,14 @@ async function renderLegendsList() {
 }
 
 async function updateLegendPts(cat, idx, newPts) {
-  const legends = await storageGetParsed('legends', DEFAULT_LEGENDS);
+  const legends = lsGet('legends', DEFAULT_LEGENDS);
   const oldPts = legends[cat][idx].pts;
   legends[cat][idx].pts = parseInt(newPts);
   // Store change with effective date (tomorrow)
-  const changes = await storageGetParsed('legendChanges', []);
+  const changes = lsGet('legendChanges', []);
   changes.push({ cat, idx, oldPts, newPts: parseInt(newPts), effectiveFrom: dateStr(tomorrow()) });
-  await storageSet('legendChanges', changes);
-  await storageSet('legends', legends);
+  lsSet('legendChanges', changes);
+  lsSet('legends', legends);
   showToast('Points updated — effective tomorrow ✓');
 }
 
@@ -2628,7 +2652,7 @@ async function addLegend() {
   const pts = parseInt(document.getElementById('newLegendPts').value);
   if (!name || isNaN(pts)) { showToast('Fill name and points'); return; }
 
-  const legends = await storageGetParsed('legends', DEFAULT_LEGENDS);
+  const legends = lsGet('legends', DEFAULT_LEGENDS);
   let targetCat = cat;
 
   if (cat === 'new') {
@@ -2640,7 +2664,7 @@ async function addLegend() {
 
   if (!legends[targetCat]) legends[targetCat] = [];
   legends[targetCat].push({ name, pts });
-  await storageSet('legends', legends);
+  lsSet('legends', legends);
 
   document.getElementById('newLegendName').value = '';
   document.getElementById('newLegendPts').value = '';
@@ -2654,12 +2678,12 @@ async function awardFreePass() {
   if (!memberName) { showToast('Select a member'); return; }
 
   // Check if already awarded this month
-  const passes = await storageGetParsed('freePasses', []);
+  const passes = lsGet('freePasses', []);
   const monthKey = new Date().toISOString().slice(0,7);
   const alreadyAwarded = passes.find(p => p.member === memberName && p.month === monthKey);
   if (alreadyAwarded) { showToast(`${memberName} already has a free pass this month`); return; }
 
-  const entries = await storageGetParsed('entries', []);
+  const entries = lsGet('entries', []);
   entries.push({
     id: Date.now().toString(),
     member: memberName,
@@ -2676,8 +2700,8 @@ async function awardFreePass() {
   });
 
   passes.push({ member: memberName, month: monthKey, awardedBy: state.currentCapt });
-  await storageSet('entries', entries);
-  await storageSet('freePasses', passes);
+  lsSet('entries', entries);
+  lsSet('freePasses', passes);
   showToast(`🎟️ Free pass awarded to ${memberName}! (10 pts)`);
 }
 
@@ -2694,7 +2718,7 @@ async function switchCTab(tab) {
 
 // POPULATE SELECTS
 async function populateCaptainSelects() {
-  const members = await storageGetParsed('members', DEFAULT_MEMBERS);
+  const members = lsGet('members', DEFAULT_MEMBERS);
   const allM = [...(members.Ram||[]),...(members.Mano||[])];
 
   const fpSel = document.getElementById('freePassMember');
@@ -2706,8 +2730,8 @@ async function populateCaptainSelects() {
 
 // WEEKLY RECAP WITH AI QUOTE
 async function generateRecap() {
-  const entries = await storageGetParsed('entries', []);
-  const members = await storageGetParsed('members', DEFAULT_MEMBERS);
+  const entries = lsGet('entries', []);
+  const members = lsGet('members', DEFAULT_MEMBERS);
   const week = getWeekLabel(new Date());
   const weekEntries = entries.filter(e => e.week === week && e.counted);
 
@@ -2773,7 +2797,7 @@ function copyRecap() {
 
 // EXPORT
 async function exportToExcel() {
-  const entries = await storageGetParsed('entries', []);
+  const entries = lsGet('entries', []);
   const week = getWeekLabel(new Date());
   const weekEntries = entries.filter(e => e.week === week);
 

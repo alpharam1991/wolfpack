@@ -1696,30 +1696,55 @@ let state = {
   lbTab: 'team',
 };
 
-// ===================== STORAGE — localStorage (GitHub Pages safe) =====================
-function lsSet(key, val) {
+// ===================== STORAGE — Firebase Realtime Database (shared across all devices) =====================
+const FIREBASE_URL = 'https://wolfpack-fitness-dfc73-default-rtdb.firebaseio.com';
+
+// Local cache so UI feels instant
+const _cache = {};
+
+async function lsSet(key, val) {
   try {
+    _cache[key] = val;
+    // Also keep local copy for offline fallback
     localStorage.setItem('wp_' + key, JSON.stringify(val));
+    const res = await fetch(FIREBASE_URL + '/' + key + '.json', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(val)
+    });
+    if (!res.ok) throw new Error('Firebase write failed: ' + res.status);
     return true;
   } catch(e) {
-    console.error('Storage write error:', e);
-    return false;
+    console.error('lsSet error:', e);
+    // Still saved locally at least
+    return true;
   }
 }
 
-function lsGet(key, def) {
+async function lsGet(key, def) {
   try {
-    const raw = localStorage.getItem('wp_' + key);
-    if (raw === null || raw === undefined) return def;
-    const parsed = JSON.parse(raw);
-    return parsed;
+    // Try Firebase first
+    const res = await fetch(FIREBASE_URL + '/' + key + '.json');
+    if (!res.ok) throw new Error('Firebase read failed: ' + res.status);
+    const data = await res.json();
+    if (data === null || data === undefined) {
+      // Check local cache
+      const local = localStorage.getItem('wp_' + key);
+      return local ? JSON.parse(local) : def;
+    }
+    _cache[key] = data;
+    localStorage.setItem('wp_' + key, JSON.stringify(data));
+    return data;
   } catch(e) {
-    console.error('lsGet error for key:', key, e);
-    return def;
+    console.error('lsGet error for', key, e);
+    // Fallback to localStorage
+    try {
+      const local = localStorage.getItem('wp_' + key);
+      return local ? JSON.parse(local) : def;
+    } catch(e2) { return def; }
   }
 }
 
-// Keep async wrappers for compatibility
 async function storageSet(key, val) { return lsSet(key, val); }
 async function storageGetParsed(key, def) { return lsGet(key, def); }
 
@@ -1885,24 +1910,24 @@ const PRELOADED_ENTRIES = [
 // ===================== INIT =====================
 async function init() {
   // Initialize defaults if not set
-  const members = lsGet('members', null);
+  const members = await lsGet('members', null);
   if (!members) lsSet('members', DEFAULT_MEMBERS);
 
-  const legends = lsGet('legends', null);
+  const legends = await lsGet('legends', null);
   if (!legends) lsSet('legends', DEFAULT_LEGENDS);
 
   // Load preloaded entries — always replace pre_ entries with latest correct data
-  const preloaded = lsGet('preloaded_done', false);
-  if (preloaded !== 'v9') {
-    const existing = lsGet('entries', []).filter(e => !e.id.startsWith('pre_')); // keep only real user entries
+  const preloaded = await lsGet('preloaded_done', false);
+  if (preloaded !== 'v10') {
+    const existing = await lsGet('entries', []).filter(e => !e.id.startsWith('pre_')); // keep only real user entries
     const merged = [...existing, ...PRELOADED_ENTRIES]; // always use fresh preloaded data
-    lsSet('entries', merged);
-    lsSet('preloaded_done', 'v9');
+    await lsSet('entries', merged);
+    await lsSet('preloaded_done', 'v10');
     console.log('✅ Preloaded v6 —', merged.length, 'entries');
   }
 
   // Check saved session
-  const savedUser = lsGet('session', null);
+  const savedUser = await lsGet('session', null);
   if (savedUser && savedUser.name) {
     state.currentUser = savedUser.name;
     state.currentTeam = savedUser.team;
@@ -1931,7 +1956,7 @@ function selectTeam(team) {
 }
 
 async function populateMemberSelect(team) {
-  const members = lsGet('members', DEFAULT_MEMBERS);
+  const members = await lsGet('members', DEFAULT_MEMBERS);
   const sel = document.getElementById('memberSelect');
   sel.innerHTML = '<option value="">— Select your name —</option>';
   (members[team] || []).forEach(m => {
@@ -1947,7 +1972,7 @@ async function onMemberSelect() {
   if (!name) return;
   // Auto-detect team if not selected
   if (!state.currentTeam) {
-    const members = lsGet('members', DEFAULT_MEMBERS);
+    const members = await lsGet('members', DEFAULT_MEMBERS);
     for (const [t, list] of Object.entries(members)) {
       if (list.find(m => m.name === name)) {
         state.currentTeam = t;
@@ -1963,7 +1988,7 @@ async function memberLogin() {
   if (!name) { showToast('Please select your name'); return; }
   if (!state.currentTeam) { showToast('Please select your team'); return; }
 
-  const members = lsGet('members', DEFAULT_MEMBERS);
+  const members = await lsGet('members', DEFAULT_MEMBERS);
   const teamMembers = members[state.currentTeam] || [];
   const member = teamMembers.find(m => m.name === name);
   if (!member) { showToast('Member not found'); return; }
@@ -1993,7 +2018,7 @@ async function captainLogin() {
   state.isCapt = true;
 
   // Find team
-  const members = lsGet('members', DEFAULT_MEMBERS);
+  const members = await lsGet('members', DEFAULT_MEMBERS);
   for (const [t, list] of Object.entries(members)) {
     if (list.find(m => m.name === name)) { state.currentTeam = t; break; }
   }
@@ -2013,6 +2038,9 @@ function logout() {
 // ===================== MEMBER APP =====================
 async function launchMemberApp() {
   showScreen('main-app');
+  // Show loading state while Firebase data loads
+  const todayContainer = document.getElementById('todayLogs');
+  if (todayContainer) todayContainer.innerHTML = '<div style="text-align:center;padding:24px;color:var(--wolf-gray);font-family:var(--font-heading);">⏳ Loading...</div>';
   document.getElementById('userAvatar').textContent = state.currentUser.charAt(0).toUpperCase();
   document.getElementById('headerUserName').textContent = state.currentUser;
   document.getElementById('headerTeamName').textContent = 'Team ' + state.currentTeam;
@@ -2042,7 +2070,7 @@ async function launchCaptainWithLog() {
 }
 
 async function renderActivityButtons() {
-  const legends = lsGet('legends', DEFAULT_LEGENDS);
+  const legends = await lsGet('legends', DEFAULT_LEGENDS);
   ['run','strength','culture','crosstraining'].forEach(cat => {
     const container = document.getElementById('pills-' + cat);
     container.innerHTML = '';
@@ -2104,29 +2132,17 @@ async function saveEntry() {
   }
 
   const notes = document.getElementById('entryNotes').value.trim();
-  const now = new Date();
-  const today = dateStr(now);
-  const week = getWeekLabel(now);
+  const today = dateStr(new Date());
 
-  console.log('💾 Saving entry:', {
-    member: state.currentUser,
-    team: state.currentTeam,
-    date: today,
-    week: week,
-    activity: state.selectedActivity,
-    option: state.selectedOption,
-    pts: state.selectedOptionPts
-  });
-
-  const entries = lsGet('entries', []);
-  console.log('📦 Loaded', entries.length, 'existing entries');
+  // Load entries synchronously
+  const entries = await lsGet('entries', []);
 
   const newEntry = {
     id: 'e_' + Date.now(),
     member: state.currentUser,
     team: state.currentTeam,
     date: today,
-    week: week,
+    week: getWeekLabel(new Date()),
     activity: state.selectedActivity,
     option: state.selectedOption,
     pts: state.selectedOptionPts,
@@ -2143,25 +2159,23 @@ async function saveEntry() {
   const maxPts = Math.max(...allToday.map(e => e.pts));
   allToday.forEach(e => { e.counted = (e.pts === maxPts); });
 
-  const saved = lsSet('entries', entries);
-  console.log('💾 lsSet result:', saved);
+  // Save synchronously
+  const saved = await lsSet('entries', entries);
 
   if (!saved) {
-    showToast('❌ Save failed!');
+    showToast('❌ Save failed! Check browser storage settings');
     return;
   }
 
-  // Verify
-  const verify = lsGet('entries', []);
+  // Verify save worked
+  const verify = await lsGet('entries', []);
   const found = verify.find(e => e.id === newEntry.id);
-  console.log('🔍 Verify find result:', found ? 'FOUND ✅' : 'NOT FOUND ❌');
-
   if (!found) {
-    showToast('❌ Entry not saved — storage blocked');
+    showToast('❌ Entry not saved — storage may be blocked');
     return;
   }
 
-  showToast('✅ Saved! ' + state.selectedOptionPts + ' pts');
+  showToast(`✅ Saved! ${state.selectedOptionPts} pts`);
 
   // Reset UI
   state.selectedActivity = null;
@@ -2174,31 +2188,21 @@ async function saveEntry() {
   document.getElementById('trackingLink').value = '';
   document.getElementById('entryNotes').value = '';
 
-  renderTodayLogs();
-  updateWeekStats();
-  renderStreak();
+  await renderTodayLogs();
+  await updateWeekStats();
+  await renderStreak();
 }
 
-function renderTodayLogs() {
+async async function renderTodayLogs() {
   const today = dateStr(new Date());
-  const entries = lsGet('entries', []);
+  const entries = await lsGet('entries', []);
   const todayEntries = entries.filter(e => e.member === state.currentUser && e.date === today);
-
-  console.log('📅 renderTodayLogs:', {
-    today,
-    currentUser: state.currentUser,
-    totalEntries: entries.length,
-    todayEntries: todayEntries.length,
-    sampleEntries: entries.slice(-3).map(e => ({member:e.member, date:e.date, id:e.id}))
-  });
-
   const container = document.getElementById('todayLogs');
-  if (!container) return;
 
   document.getElementById('todayLoggedAlert').classList.toggle('hidden', todayEntries.length === 0);
 
   if (!todayEntries.length) {
-    container.innerHTML = '<div style="text-align:center;padding:24px;color:var(--wolf-gray);font-family:var(--font-heading);">No entries today yet. Get moving! 🐺</div>';
+    container.innerHTML = `<div style="text-align:center;padding:24px;color:var(--wolf-gray);font-family:var(--font-heading);">No entries today yet. Get moving! 🐺</div>`;
     return;
   }
 
@@ -2208,7 +2212,7 @@ function renderTodayLogs() {
       <div class="log-info">
         <div class="log-type" style="color:${actColor(e.activity)}">${e.activity.toUpperCase()} — ${e.option}</div>
         <div class="log-detail">${e.counted ? '✅ Counted' : '⚠️ Not counted (lower score)'} · ${e.pts} pts</div>
-        ${e.trackingLink && e.trackingLink !== '#ghosted' && e.trackingLink !== '#preloaded' ? `<a class="log-link" href="${e.trackingLink}" target="_blank">🔗 View Activity</a>` : ''}
+        <a class="log-link" href="${e.trackingLink}" target="_blank">🔗 View Activity</a>
       </div>
       <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
         <div class="log-pts">${e.pts}</div>
@@ -2218,8 +2222,8 @@ function renderTodayLogs() {
   `).join('');
 }
 
-function updateWeekStats() {
-  const entries = lsGet('entries', []);
+async async function updateWeekStats() {
+  const entries = await lsGet('entries', []);
   const week = getWeekLabel(new Date());
   const myEntries = entries.filter(e => e.member === state.currentUser && e.week === week && e.counted);
 
@@ -2232,8 +2236,8 @@ function updateWeekStats() {
   document.getElementById('statTotal').textContent = total;
 }
 
-function renderStreak() {
-  const entries = lsGet('entries', []);
+async async function renderStreak() {
+  const entries = await lsGet('entries', []);
   const myEntries = entries.filter(e => e.member === state.currentUser && e.counted);
   const streak = calcStreak(myEntries);
   const el = document.getElementById('streakDisplay');
@@ -2264,7 +2268,7 @@ function calcStreak(entries) {
 
 // ===================== MY WEEK TAB =====================
 async function renderMyWeek() {
-  const entries = lsGet('entries', []);
+  const entries = await lsGet('entries', []);
   const week = getWeekLabel(new Date());
   const myEntries = entries.filter(e => e.member === state.currentUser && e.week === week && e.counted);
 
@@ -2320,7 +2324,7 @@ async function renderMyWeek() {
 }
 
 async function deleteMyEntry(id) {
-  const entries = lsGet('entries', []);
+  const entries = await lsGet('entries', []);
   const idx = entries.findIndex(e => e.id === id && e.member === state.currentUser);
   if (idx === -1) return;
   const e = entries[idx];
@@ -2350,8 +2354,8 @@ async function renderLeaderboard() {
   document.getElementById('sundayLock').classList.add('hidden');
   document.getElementById('leaderboardContent').classList.remove('hidden');
 
-  const entries = lsGet('entries', []);
-  const members = lsGet('members', DEFAULT_MEMBERS);
+  const entries = await lsGet('entries', []);
+  const members = await lsGet('members', DEFAULT_MEMBERS);
   const week = getWeekLabel(new Date());
 
   // Calculate scores
@@ -2411,7 +2415,7 @@ function switchTab(tab) {
 
 // ===================== LEGEND MODAL =====================
 async function showLegend(cat) {
-  const legends = lsGet('legends', DEFAULT_LEGENDS);
+  const legends = await lsGet('legends', DEFAULT_LEGENDS);
   const catNames = { run:'🏃 RUN', strength:'💪 STRENGTH', culture:'🤝 CULTURE', crosstraining:'🚴 CROSS TRAINING' };
   document.getElementById('legendModalTitle').textContent = catNames[cat] || cat.toUpperCase();
   document.getElementById('legendModalSub').textContent = 'Points for each option';
@@ -2447,8 +2451,8 @@ async function launchCaptainApp() {
 }
 
 async function renderCaptainDashboard() {
-  const entries = lsGet('entries', []);
-  const members = lsGet('members', DEFAULT_MEMBERS);
+  const entries = await lsGet('entries', []);
+  const members = await lsGet('members', DEFAULT_MEMBERS);
   const week = getWeekLabel(new Date());
 
   // Top 5 performers this week
@@ -2510,7 +2514,7 @@ async function renderCaptainDashboard() {
 }
 
 async function renderCaptainLogs() {
-  const entries = lsGet('entries', []);
+  const entries = await lsGet('entries', []);
   const filter = document.getElementById('logFilterMember').value;
   const filtered = filter ? entries.filter(e=>e.member===filter) : entries;
   const sorted = [...filtered].sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
@@ -2535,7 +2539,7 @@ async function renderCaptainLogs() {
 }
 
 async function showNoteModal(id) {
-  const entries = lsGet('entries', []);
+  const entries = await lsGet('entries', []);
   const e = entries.find(x => x.id === id);
   if (!e) return;
   state.editingEntryId = id;
@@ -2555,7 +2559,7 @@ function toggleLinkField(option) {
 }
 
 async function openEditEntry(id) {
-  const entries = lsGet('entries', []);
+  const entries = await lsGet('entries', []);
   const e = entries.find(x => x.id === id);
   if (!e) return;
   state.editingEntryId = id;
@@ -2565,7 +2569,7 @@ async function openEditEntry(id) {
 }
 
 async function saveEditEntry() {
-  const entries = lsGet('entries', []);
+  const entries = await lsGet('entries', []);
   const idx = entries.findIndex(e => e.id === state.editingEntryId);
   if (idx === -1) return;
   entries[idx].notes = document.getElementById('editEntryNotes').value;
@@ -2577,7 +2581,7 @@ async function saveEditEntry() {
 
 async function deleteEntry() {
   if (!confirm('Delete this entry?')) return;
-  const entries = lsGet('entries', []);
+  const entries = await lsGet('entries', []);
   const idx = entries.findIndex(e => e.id === state.editingEntryId);
   if (idx === -1) return;
   entries.splice(idx, 1);
@@ -2601,7 +2605,7 @@ async function addMember() {
   if (!state.newMemberTeam) { showToast('Select a team'); return; }
   const isCapt = document.getElementById('newMemberIsCaptain').checked;
 
-  const members = lsGet('members', DEFAULT_MEMBERS);
+  const members = await lsGet('members', DEFAULT_MEMBERS);
   if (!members[state.newMemberTeam]) members[state.newMemberTeam] = [];
   if (members[state.newMemberTeam].find(m=>m.name===name)) { showToast('Member already exists'); return; }
 
@@ -2614,7 +2618,7 @@ async function addMember() {
 }
 
 async function renderMemberLists() {
-  const members = lsGet('members', DEFAULT_MEMBERS);
+  const members = await lsGet('members', DEFAULT_MEMBERS);
   ['Ram','Mano'].forEach(team => {
     document.getElementById('memberList'+team).innerHTML = (members[team]||[]).map(m => `
       <div class="member-row">
@@ -2631,7 +2635,7 @@ async function renderMemberLists() {
 
 async function removeMember(name, team) {
   if (!confirm(`Remove ${name} from Team ${team}?`)) return;
-  const members = lsGet('members', DEFAULT_MEMBERS);
+  const members = await lsGet('members', DEFAULT_MEMBERS);
   members[team] = (members[team]||[]).filter(m=>m.name!==name);
   lsSet('members', members);
   showToast(`${name} removed`);
@@ -2640,7 +2644,7 @@ async function removeMember(name, team) {
 
 // LEGENDS
 async function renderLegendsList() {
-  const legends = lsGet('legends', DEFAULT_LEGENDS);
+  const legends = await lsGet('legends', DEFAULT_LEGENDS);
   const catNames = { run:'🏃 RUN', strength:'💪 STRENGTH', culture:'🤝 CULTURE', crosstraining:'🚴 CROSS TRAINING' };
   const container = document.getElementById('legendsList');
   container.innerHTML = '';
@@ -2664,11 +2668,11 @@ async function renderLegendsList() {
 }
 
 async function updateLegendPts(cat, idx, newPts) {
-  const legends = lsGet('legends', DEFAULT_LEGENDS);
+  const legends = await lsGet('legends', DEFAULT_LEGENDS);
   const oldPts = legends[cat][idx].pts;
   legends[cat][idx].pts = parseInt(newPts);
   // Store change with effective date (tomorrow)
-  const changes = lsGet('legendChanges', []);
+  const changes = await lsGet('legendChanges', []);
   changes.push({ cat, idx, oldPts, newPts: parseInt(newPts), effectiveFrom: dateStr(tomorrow()) });
   lsSet('legendChanges', changes);
   lsSet('legends', legends);
@@ -2681,7 +2685,7 @@ async function addLegend() {
   const pts = parseInt(document.getElementById('newLegendPts').value);
   if (!name || isNaN(pts)) { showToast('Fill name and points'); return; }
 
-  const legends = lsGet('legends', DEFAULT_LEGENDS);
+  const legends = await lsGet('legends', DEFAULT_LEGENDS);
   let targetCat = cat;
 
   if (cat === 'new') {
@@ -2707,12 +2711,12 @@ async function awardFreePass() {
   if (!memberName) { showToast('Select a member'); return; }
 
   // Check if already awarded this month
-  const passes = lsGet('freePasses', []);
+  const passes = await lsGet('freePasses', []);
   const monthKey = new Date().toISOString().slice(0,7);
   const alreadyAwarded = passes.find(p => p.member === memberName && p.month === monthKey);
   if (alreadyAwarded) { showToast(`${memberName} already has a free pass this month`); return; }
 
-  const entries = lsGet('entries', []);
+  const entries = await lsGet('entries', []);
   entries.push({
     id: Date.now().toString(),
     member: memberName,
@@ -2747,7 +2751,7 @@ async function switchCTab(tab) {
 
 // POPULATE SELECTS
 async function populateCaptainSelects() {
-  const members = lsGet('members', DEFAULT_MEMBERS);
+  const members = await lsGet('members', DEFAULT_MEMBERS);
   const allM = [...(members.Ram||[]),...(members.Mano||[])];
 
   const fpSel = document.getElementById('freePassMember');
@@ -2759,8 +2763,8 @@ async function populateCaptainSelects() {
 
 // WEEKLY RECAP WITH AI QUOTE
 async function generateRecap() {
-  const entries = lsGet('entries', []);
-  const members = lsGet('members', DEFAULT_MEMBERS);
+  const entries = await lsGet('entries', []);
+  const members = await lsGet('members', DEFAULT_MEMBERS);
   const week = getWeekLabel(new Date());
   const weekEntries = entries.filter(e => e.week === week && e.counted);
 
@@ -2826,7 +2830,7 @@ function copyRecap() {
 
 // EXPORT
 async function exportToExcel() {
-  const entries = lsGet('entries', []);
+  const entries = await lsGet('entries', []);
   const week = getWeekLabel(new Date());
   const weekEntries = entries.filter(e => e.week === week);
 

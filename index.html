@@ -1696,57 +1696,40 @@ let state = {
   lbTab: 'team',
 };
 
-// ===================== STORAGE — Firebase Realtime Database (shared across all devices) =====================
+// ===================== STORAGE — Firebase Realtime Database =====================
 const FIREBASE_URL = 'https://wolfpack-fitness-dfc73-default-rtdb.firebaseio.com';
 
-// Local cache so UI feels instant
-const _cache = {};
+function lsLocalSet(key, val) {
+  try { localStorage.setItem('wp_'+key, JSON.stringify(val)); } catch(e) {}
+}
+function lsLocalGet(key, def) {
+  try { var r=localStorage.getItem('wp_'+key); return r?JSON.parse(r):def; } catch(e) { return def; }
+}
 
 async function lsSet(key, val) {
+  lsLocalSet(key, val);
   try {
-    _cache[key] = val;
-    // Also keep local copy for offline fallback
-    localStorage.setItem('wp_' + key, JSON.stringify(val));
-    const res = await fetch(FIREBASE_URL + '/' + key + '.json', {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(val)
+    var res = await fetch(FIREBASE_URL+'/'+key+'.json', {
+      method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(val)
     });
-    if (!res.ok) throw new Error('Firebase write failed: ' + res.status);
-    return true;
-  } catch(e) {
-    console.error('lsSet error:', e);
-    // Still saved locally at least
-    return true;
-  }
+    if(!res.ok) throw new Error(res.status);
+  } catch(e) { console.warn('Firebase write failed, local only:', e); }
+  return true;
 }
 
 async function lsGet(key, def) {
   try {
-    // Try Firebase first
-    const res = await fetch(FIREBASE_URL + '/' + key + '.json');
-    if (!res.ok) throw new Error('Firebase read failed: ' + res.status);
-    const data = await res.json();
-    if (data === null || data === undefined) {
-      // Check local cache
-      const local = localStorage.getItem('wp_' + key);
-      return local ? JSON.parse(local) : def;
-    }
-    _cache[key] = data;
-    localStorage.setItem('wp_' + key, JSON.stringify(data));
+    var res = await fetch(FIREBASE_URL+'/'+key+'.json');
+    if(!res.ok) throw new Error(res.status);
+    var data = await res.json();
+    if(data===null||data===undefined) return lsLocalGet(key, def);
+    lsLocalSet(key, data);
     return data;
   } catch(e) {
-    console.error('lsGet error for', key, e);
-    // Fallback to localStorage
-    try {
-      const local = localStorage.getItem('wp_' + key);
-      return local ? JSON.parse(local) : def;
-    } catch(e2) { return def; }
+    console.warn('Firebase read failed, using local:', e);
+    return lsLocalGet(key, def);
   }
 }
-
-async function storageSet(key, val) { return lsSet(key, val); }
-async function storageGetParsed(key, def) { return lsGet(key, def); }
 
 // ===================== PRELOADED WEEK 1 DATA =====================
 const WEEK1 = 'Feb 23 – Mar 1';
@@ -1911,18 +1894,19 @@ const PRELOADED_ENTRIES = [
 async function init() {
   // Initialize defaults if not set
   const members = await lsGet('members', null);
-  if (!members) lsSet('members', DEFAULT_MEMBERS);
+  if (!members) await lsSet('members', DEFAULT_MEMBERS);
 
   const legends = await lsGet('legends', null);
-  if (!legends) lsSet('legends', DEFAULT_LEGENDS);
+  if (!legends) await lsSet('legends', DEFAULT_LEGENDS);
 
   // Load preloaded entries — always replace pre_ entries with latest correct data
   const preloaded = await lsGet('preloaded_done', false);
-  if (preloaded !== 'v10') {
-    const existing = await lsGet('entries', []).filter(e => !e.id.startsWith('pre_')); // keep only real user entries
+  if (preloaded !== 'v11') {
+    const allEntries = await lsGet('entries', []);
+    const existing = allEntries.filter(e => !e.id.startsWith('pre_')); // keep only real user entries
     const merged = [...existing, ...PRELOADED_ENTRIES]; // always use fresh preloaded data
-    await lsSet('entries', merged);
-    await lsSet('preloaded_done', 'v10');
+    lsSet('entries', merged);
+    lsSet('preloaded_done', 'v11');
     console.log('✅ Preloaded v6 —', merged.length, 'entries');
   }
 
@@ -1996,7 +1980,7 @@ async function memberLogin() {
   state.currentUser = name;
   state.isCapt = member.isCapt || false;
 
-  lsSet('session', { name, team: state.currentTeam, isCapt: state.isCapt });
+  await lsSet('session', { name, team: state.currentTeam, isCapt: state.isCapt });
 
   if (state.isCapt) {
     state.currentCapt = name;
@@ -2024,13 +2008,13 @@ async function captainLogin() {
   }
   if (!state.currentTeam) state.currentTeam = 'Ram';
 
-  lsSet('session', { name, team: state.currentTeam, isCapt: true });
+  await lsSet('session', { name, team: state.currentTeam, isCapt: true });
   // Captains see log screen first
   await launchCaptainWithLog();
 }
 
-function logout() {
-  lsSet('session', null);
+async function logout() {
+  await lsSet('session', null);
   state = { currentUser:null, currentTeam:null, isCapt:false, currentCapt:null, selectedActivity:null, selectedOption:null, selectedOptionPts:0, editingEntryId:null, newMemberTeam:null, lbTab:'team' };
   showScreen('splash');
 }
@@ -2038,9 +2022,6 @@ function logout() {
 // ===================== MEMBER APP =====================
 async function launchMemberApp() {
   showScreen('main-app');
-  // Show loading state while Firebase data loads
-  const todayContainer = document.getElementById('todayLogs');
-  if (todayContainer) todayContainer.innerHTML = '<div style="text-align:center;padding:24px;color:var(--wolf-gray);font-family:var(--font-heading);">⏳ Loading...</div>';
   document.getElementById('userAvatar').textContent = state.currentUser.charAt(0).toUpperCase();
   document.getElementById('headerUserName').textContent = state.currentUser;
   document.getElementById('headerTeamName').textContent = 'Team ' + state.currentTeam;
@@ -2193,7 +2174,7 @@ async function saveEntry() {
   await renderStreak();
 }
 
-async async function renderTodayLogs() {
+async function renderTodayLogs() {
   const today = dateStr(new Date());
   const entries = await lsGet('entries', []);
   const todayEntries = entries.filter(e => e.member === state.currentUser && e.date === today);
@@ -2222,7 +2203,7 @@ async async function renderTodayLogs() {
   `).join('');
 }
 
-async async function updateWeekStats() {
+async function updateWeekStats() {
   const entries = await lsGet('entries', []);
   const week = getWeekLabel(new Date());
   const myEntries = entries.filter(e => e.member === state.currentUser && e.week === week && e.counted);
@@ -2236,7 +2217,7 @@ async async function updateWeekStats() {
   document.getElementById('statTotal').textContent = total;
 }
 
-async async function renderStreak() {
+async function renderStreak() {
   const entries = await lsGet('entries', []);
   const myEntries = entries.filter(e => e.member === state.currentUser && e.counted);
   const streak = calcStreak(myEntries);
@@ -2854,9 +2835,7 @@ function actColor(a) {
 }
 
 function dateStr(d) {
-  const y = d.getFullYear();
-  const m = String(d.getMonth()+1).padStart(2,'0');
-  const day = String(d.getDate()).padStart(2,'0');
+  var y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');
   return y+'-'+m+'-'+day;
 }
 

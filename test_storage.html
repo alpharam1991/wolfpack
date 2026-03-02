@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Storage Test</title>
+<style>
+body { font-family: sans-serif; padding: 20px; background: #111; color: #eee; }
+button { padding: 12px 24px; margin: 8px; font-size: 16px; cursor: pointer; border-radius: 8px; border: none; }
+.save { background: #2dc653; color: #000; }
+.read { background: #00b4d8; color: #000; }
+.clear { background: #e63946; color: #fff; }
+#output { background: #1a2035; padding: 16px; border-radius: 8px; margin-top: 16px; font-family: monospace; font-size: 14px; min-height: 100px; white-space: pre-wrap; }
+input { padding: 10px; font-size: 16px; width: 300px; border-radius: 8px; border: 1px solid #444; background: #222; color: #eee; margin: 8px; }
+</style>
+</head>
+<body>
+<h2>🔧 LocalStorage Test</h2>
+<div>
+  <input type="text" id="testVal" placeholder="Type something and save" value="test entry 123">
+  <br>
+  <button class="save" onclick="doSave()">💾 SAVE</button>
+  <button class="read" onclick="doRead()">📖 READ</button>
+  <button class="clear" onclick="doClear()">🗑️ CLEAR</button>
+</div>
+<div id="output">Results will appear here...</div>
+
+<script>
+function log(msg) {
+  document.getElementById('output').textContent += msg + '\n';
+}
+function doSave() {
+  document.getElementById('output').textContent = '';
+  try {
+    const val = document.getElementById('testVal').value;
+    const data = { text: val, time: new Date().toLocaleString(), date: getLocalDate() };
+    localStorage.setItem('wolf_test', JSON.stringify(data));
+    const verify = localStorage.getItem('wolf_test');
+    if (verify) {
+      log('✅ SAVE SUCCESS');
+      log('Saved: ' + verify);
+    } else {
+      log('❌ SAVE FAILED - nothing stored');
+    }
+  } catch(e) {
+    log('❌ ERROR: ' + e.message);
+  }
+}
+function doRead() {
+  document.getElementById('output').textContent = '';
+  try {
+    const raw = localStorage.getItem('wolf_test');
+    if (raw) {
+      log('✅ READ SUCCESS');
+      log('Data: ' + raw);
+    } else {
+      log('⚠️ Nothing saved yet');
+    }
+    log('\nAll wolfpack keys:');
+    for(let i=0; i<localStorage.length; i++){
+      const k = localStorage.key(i);
+      if(k && k.startsWith('wp_')) log(' - ' + k + ': ' + localStorage.getItem(k).length + ' chars');
+    }
+  } catch(e) {
+    log('❌ ERROR: ' + e.message);
+  }
+}
+function doClear() {
+  document.getElementById('output').textContent = '';
+  try {
+    const keys = [];
+    for(let i=0; i<localStorage.length; i++) { keys.push(localStorage.key(i)); }
+    keys.filter(k => k && k.startsWith('wp_')).forEach(k => localStorage.removeItem(k));
+    localStorage.removeItem('wolf_test');
+    log('✅ Cleared all wolfpack data');
+  } catch(e) {
+    log('❌ ERROR: ' + e.message);
+  }
+}
+function getLocalDate() {
+  const d = new Date();
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+log('Local date: ' + getLocalDate());
+log('localStorage available: ' + (typeof localStorage !== 'undefined' ? 'YES' : 'NO'));
+try { localStorage.setItem('_t','1'); localStorage.removeItem('_t'); log('Read/write: OK'); } catch(e) { log('Read/write: BLOCKED - ' + e.message); }
+</script>
+</body>
+</html>

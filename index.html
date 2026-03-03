@@ -1723,6 +1723,10 @@ async function lsGet(key, def) {
     if(!res.ok) throw new Error(res.status);
     var data = await res.json();
     if(data===null||data===undefined) return lsLocalGet(key, def);
+    // Firebase stores JS arrays as objects {0:{...},1:{...}} — convert back to array
+    if(Array.isArray(def) && data !== null && typeof data === 'object' && !Array.isArray(data)) {
+      data = Object.values(data);
+    }
     lsLocalSet(key, data);
     return data;
   } catch(e) {
@@ -1980,7 +1984,7 @@ async function memberLogin() {
   state.currentUser = name;
   state.isCapt = member.isCapt || false;
 
-  await lsSet('session', { name, team: state.currentTeam, isCapt: state.isCapt });
+  lsLocalSet('session', { name, team: state.currentTeam, isCapt: state.isCapt });
 
   if (state.isCapt) {
     state.currentCapt = name;
@@ -2008,13 +2012,13 @@ async function captainLogin() {
   }
   if (!state.currentTeam) state.currentTeam = 'Ram';
 
-  await lsSet('session', { name, team: state.currentTeam, isCapt: true });
+  lsLocalSet('session', { name, team: state.currentTeam, isCapt: true });
   // Captains see log screen first
   await launchCaptainWithLog();
 }
 
 async function logout() {
-  await lsSet('session', null);
+  localStorage.removeItem('wp_session');
   state = { currentUser:null, currentTeam:null, isCapt:false, currentCapt:null, selectedActivity:null, selectedOption:null, selectedOptionPts:0, editingEntryId:null, newMemberTeam:null, lbTab:'team' };
   showScreen('splash');
 }
